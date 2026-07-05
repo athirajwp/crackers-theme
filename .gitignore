@@ -39,7 +39,3 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-# Temporary ignores to split code and assets commits
-backend/public/img/
-backend/public/images/
