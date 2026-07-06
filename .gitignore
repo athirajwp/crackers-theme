@@ -4,7 +4,6 @@ backend/.tools/
 backend/.env
 backend/.env.backup
 backend/.env.production
-backend/composer.lock
 backend/img/
 
 # Laravel storage files
