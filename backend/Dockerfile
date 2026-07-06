@@ -27,7 +27,7 @@ RUN mkdir -p /var/www/storage/framework/cache/data \
     && mkdir -p /var/www/storage/framework/testing \
     && mkdir -p /var/www/storage/framework/views \
     && mkdir -p /var/www/storage/logs \
-    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+    && chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
 # Expose port and start Laravel
 EXPOSE 8000
