@@ -148,6 +148,59 @@ export default function AdminBranding() {
     }
   };
 
+  const removeImageSlot = async (key) => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will permanently delete the image in this slot.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, remove it!',
+    });
+
+    if (!result.isConfirmed) return;
+
+    setSavingSlots((prev) => ({ ...prev, [key]: true }));
+
+    const postData = new FormData();
+    postData.append('remove_image_key', key);
+
+    try {
+      const res = await fetch('/api/admin/branding/update', {
+        method: 'POST',
+        body: postData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Removed!',
+          text: 'Image slot has been cleared.',
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        fetchBranding();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.error || 'Failed to remove image.',
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An error occurred while removing.',
+      });
+    } finally {
+      setSavingSlots((prev) => ({ ...prev, [key]: false }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -303,14 +356,24 @@ export default function AdminBranding() {
                         onChange={handleFileChange}
                         className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all"
                       />
-                      <button
-                        type="button"
-                        onClick={() => saveImageSlot(key)}
-                        disabled={!images[key] || savingSlots[key]}
-                        className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold px-3 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
-                      >
-                        {savingSlots[key] ? 'Saving...' : 'Save Slot'}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => saveImageSlot(key)}
+                          disabled={savingSlots[key]}
+                          className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                        >
+                          {savingSlots[key] ? 'Saving...' : 'Save Slot'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeImageSlot(key)}
+                          disabled={!imagePaths[key] || savingSlots[key]}
+                          className="flex-1 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     {imagePaths[key] && (
                       <div className="w-full h-24 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner">
                         <img
@@ -346,14 +409,24 @@ export default function AdminBranding() {
                       onChange={handleFileChange}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-2.5 py-1 text-[11px] font-semibold outline-none transition-all"
                     />
-                    <button
-                      type="button"
-                      onClick={() => saveImageSlot(key)}
-                      disabled={!images[key] || savingSlots[key]}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-bold py-1.5 px-3 rounded-lg text-[9px] uppercase tracking-wider transition-all shadow-sm border border-emerald-700/10"
-                    >
-                      {savingSlots[key] ? 'Saving...' : 'Save Slot'}
-                    </button>
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => saveImageSlot(key)}
+                        disabled={savingSlots[key]}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-bold py-1.5 rounded-lg text-[9px] uppercase tracking-wider transition-all shadow-sm border border-emerald-700/10"
+                      >
+                        {savingSlots[key] ? 'Saving...' : 'Save Slot'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeImageSlot(key)}
+                        disabled={!imagePaths[key] || savingSlots[key]}
+                        className="flex-1 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-bold py-1.5 rounded-lg text-[9px] uppercase tracking-wider transition-all shadow-sm border border-rose-700/10"
+                      >
+                        Remove
+                      </button>
+                    </div>
                     {imagePaths[key] && (
                       <div className="w-full h-20 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner">
                         <img
@@ -433,14 +506,24 @@ export default function AdminBranding() {
                     onChange={handleFileChange}
                     className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all"
                   />
-                  <button
-                    type="button"
-                    onClick={() => saveImageSlot('aboutus_image_1')}
-                    disabled={!images.aboutus_image_1 || savingSlots.aboutus_image_1}
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold px-3 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
-                  >
-                    {savingSlots.aboutus_image_1 ? 'Saving...' : 'Save Slot'}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => saveImageSlot('aboutus_image_1')}
+                      disabled={savingSlots.aboutus_image_1}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                    >
+                      {savingSlots.aboutus_image_1 ? 'Saving...' : 'Save Slot'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeImageSlot('aboutus_image_1')}
+                      disabled={!imagePaths.aboutus_image_1 || savingSlots.aboutus_image_1}
+                      className="flex-1 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                    >
+                      Remove
+                    </button>
+                  </div>
                   {imagePaths.aboutus_image_1 && (
                     <div className="w-full h-28 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner mt-1.5">
                       <img

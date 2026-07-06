@@ -530,6 +530,24 @@ class AdminApiController extends Controller
 
     public function updateBranding(Request $request)
     {
+        $imageFields = ['slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'];
+        for ($i = 1; $i <= 10; $i++) {
+            $imageFields[] = "gallery_image_{$i}";
+        }
+
+        // Handle removing image slots
+        if ($request->has('remove_image_key')) {
+            $removeKey = $request->input('remove_image_key');
+            if (in_array($removeKey, $imageFields)) {
+                $oldPath = Setting::get($removeKey);
+                if ($oldPath && file_exists(public_path($oldPath))) {
+                    @unlink(public_path($oldPath));
+                }
+                Setting::set($removeKey, '', 'text');
+                return response()->json(['success' => true, 'removed' => $removeKey]);
+            }
+        }
+
         $excludeFields = [
             'slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'
         ];
