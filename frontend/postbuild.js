@@ -5,6 +5,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+if (process.env.VERCEL === '1' || process.env.VERCEL === 'true') {
+  console.log('Running on Vercel: skipping postbuild step.');
+  process.exit(0);
+}
+
 const source = path.join(__dirname, '../backend/public/build/index.html');
 const dest = path.join(__dirname, '../backend/resources/views/react.blade.php');
 
