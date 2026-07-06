@@ -162,8 +162,8 @@ export default function PriceList() {
         </div>
 
         {/* Table Registry Container */}
-        <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-inner print:border-0">
-          <table className="w-full text-left text-xs border-collapse">
+        <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-inner print:border-0">
+          <table className="w-full min-w-[700px] text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-650 font-extrabold uppercase tracking-wider text-[9px]">
                 <th className="py-3 px-3 sm:px-4 w-12 text-center">S.No</th>
