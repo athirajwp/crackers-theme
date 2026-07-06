@@ -89,7 +89,8 @@ export default function PriceList() {
     );
   }
 
-  let sno = 1;
+  let snoDesktop = 1;
+  let snoMobile = 1;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 select-none">
@@ -162,8 +163,10 @@ export default function PriceList() {
         </div>
 
         {/* Table Registry Container */}
-        <div className="border border-slate-200 rounded-2xl overflow-x-auto shadow-inner print:border-0">
-          <table className="w-full min-w-[700px] text-left text-xs border-collapse">
+        {/* Table Registry Container */}
+        <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-inner print:border-0">
+          {/* Desktop Table (Visible on MD screens and during printing) */}
+          <table className="hidden md:table w-full text-left text-xs border-collapse print:table">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-650 font-extrabold uppercase tracking-wider text-[9px]">
                 <th className="py-3 px-3 sm:px-4 w-12 text-center">S.No</th>
@@ -187,7 +190,7 @@ export default function PriceList() {
 
                   {/* Product Rows */}
                   {category.products.map((product) => {
-                    const currentSno = sno++;
+                    const currentSno = snoDesktop++;
                     return (
                       <tr key={product.id} className="hover:bg-slate-50/40 transition-colors">
                         <td className="py-3 px-3 sm:px-4 text-center font-mono font-bold text-slate-400">
@@ -213,6 +216,54 @@ export default function PriceList() {
               ))}
             </tbody>
           </table>
+
+          {/* Mobile Card List (Visible on mobile/small screens, hidden during print) */}
+          <div className="md:hidden divide-y divide-slate-150 print:hidden bg-white">
+            {categories.map((category) => (
+              <React.Fragment key={category.id}>
+                {/* Category Header Block */}
+                <div className="bg-slate-100/60 font-black text-slate-700 text-[10px] uppercase tracking-wider py-3 px-4 border-y border-slate-200">
+                  <i className="fa-solid fa-circle-chevron-right text-crimson-600 mr-2 text-[9px]"></i>
+                  {category.name}
+                </div>
+
+                {/* Product Blocks */}
+                {category.products.map((product) => {
+                  const currentSno = snoMobile++;
+                  return (
+                    <div key={product.id} className="py-3.5 px-4 flex flex-col gap-1.5 hover:bg-slate-50/30 transition-colors">
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="text-xs font-bold text-slate-800">
+                          <span className="font-mono text-slate-400 font-bold mr-1.5">{currentSno}.</span>
+                          {product.name}
+                        </div>
+                        <span className="text-[10px] bg-slate-100 text-slate-500 font-bold px-2 py-0.5 rounded-lg flex-shrink-0">
+                          {product.pack_size}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center mt-1">
+                        <div className="flex items-center gap-2">
+                          <span className="line-through text-[11px] text-slate-400 font-mono">
+                            ₹{formatCurrency(product.mrp)}
+                          </span>
+                          <span className="text-[9px] text-emerald-600 bg-emerald-50 font-bold px-1.5 py-0.5 rounded-md">
+                            {settings.discount_percent}% OFF
+                          </span>
+                        </div>
+                        <div className="text-right flex items-center gap-1.5">
+                          <span className="text-[10px] text-slate-450">Net:</span>
+                          <span className="text-xs font-black text-crimson-600 font-mono">
+                            ₹{formatCurrency(product.selling_price)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </div>
     </div>
