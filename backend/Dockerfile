@@ -18,8 +18,8 @@ WORKDIR /var/www
 # Copy the backend code
 COPY . .
 
-# Install PHP packages (skipping scripts to avoid DB check errors during build)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+# Install PHP packages (skipping scripts and ignoring platform requirements to avoid build errors)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
 
 # Create storage directory structure and set permissions
 RUN mkdir -p /var/www/storage/framework/cache/data \
