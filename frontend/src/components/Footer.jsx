@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 
 export default function Footer() {
   const { settings } = useStore();
+  const location = useLocation();
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <a href="/admin/login" target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors flex items-center">
+                  <a href={`/admin/login${location.search}`} target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors flex items-center">
                     <i className="fa-solid fa-chevron-right mr-2 text-[8px] text-gold-500"></i>Admin Portal Login
                   </a>
                 </li>

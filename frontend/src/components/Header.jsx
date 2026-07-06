@@ -71,7 +71,7 @@ export default function Header() {
             </marquee>
           </div>
           <div className="flex items-center gap-4 flex-shrink-0">
-            <a href="/admin/login" target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors flex items-center gap-1.5 whitespace-nowrap">
+            <a href={`/admin/login${location.search}`} target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors flex items-center gap-1.5 whitespace-nowrap">
               <i className="fa-solid fa-user-shield text-gold-500"></i>
               <span>Admin Portal Login</span>
             </a>
