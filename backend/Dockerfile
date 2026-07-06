@@ -7,7 +7,8 @@ RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
-    bash
+    bash \
+    git
 
 # Install PHP extensions required by Laravel
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -22,8 +23,8 @@ WORKDIR /var/www
 # Copy the backend code
 COPY . .
 
-# Install PHP packages
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install PHP packages (skipping scripts to avoid DB check errors during build)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Create storage directory structure and set permissions
 RUN mkdir -p /var/www/storage/framework/cache/data \
@@ -36,4 +37,4 @@ RUN mkdir -p /var/www/storage/framework/cache/data \
 # Expose port and start Laravel
 EXPOSE 8000
 
-CMD php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan package:discover --ansi && php artisan serve --host=0.0.0.0 --port=$PORT
