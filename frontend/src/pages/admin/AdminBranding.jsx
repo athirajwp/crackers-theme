@@ -24,23 +24,7 @@ export default function AdminBranding() {
     marquee_alert_4: '', marquee_alert_5: '', marquee_alert_6: '',
   });
 
-  // Uploaded files
-  const [images, setImages] = useState({
-    slider_image_1: null,
-    slider_image_2: null,
-    slider_image_3: null,
-    aboutus_image_1: null,
-    gallery_image_1: null,
-    gallery_image_2: null,
-    gallery_image_3: null,
-    gallery_image_4: null,
-    gallery_image_5: null,
-    gallery_image_6: null,
-    gallery_image_7: null,
-    gallery_image_8: null,
-    gallery_image_9: null,
-    gallery_image_10: null,
-  });
+
 
   // Paths returned by API
   const [imagePaths, setImagePaths] = useState({});
@@ -89,28 +73,15 @@ export default function AdminBranding() {
     }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const { name, files } = e.target;
-    setImages((prev) => ({
-      ...prev,
-      [name]: files[0],
-    }));
-  };
+    const file = files[0];
+    if (!file) return;
 
-  const saveImageSlot = async (key) => {
-    if (!images[key]) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'No file selected',
-        text: 'Please select an image file first before saving.',
-      });
-      return;
-    }
-
-    setSavingSlots((prev) => ({ ...prev, [key]: true }));
+    setSavingSlots((prev) => ({ ...prev, [name]: true }));
 
     const postData = new FormData();
-    postData.append(key, images[key]);
+    postData.append(name, file);
 
     try {
       const res = await fetch('/api/admin/branding/update', {
@@ -123,12 +94,11 @@ export default function AdminBranding() {
       if (res.ok) {
         Swal.fire({
           icon: 'success',
-          title: 'Slot Saved!',
-          text: 'Image has been uploaded successfully.',
+          title: 'Image Uploaded!',
+          text: 'Image has been updated successfully.',
           showConfirmButton: false,
           timer: 1500,
         });
-        setImages((prev) => ({ ...prev, [key]: null }));
         fetchBranding();
       } else {
         Swal.fire({
@@ -144,7 +114,7 @@ export default function AdminBranding() {
         text: 'An error occurred during upload.',
       });
     } finally {
-      setSavingSlots((prev) => ({ ...prev, [key]: false }));
+      setSavingSlots((prev) => ({ ...prev, [name]: false }));
     }
   };
 
@@ -157,11 +127,7 @@ export default function AdminBranding() {
       postData.append(key, formData[key] || '');
     });
 
-    Object.keys(images).forEach((key) => {
-      if (images[key]) {
-        postData.append(key, images[key]);
-      }
-    });
+
 
     try {
       const res = await fetch('/api/admin/branding/update', {
@@ -296,21 +262,19 @@ export default function AdminBranding() {
                     <label className="text-[9px] font-black text-slate-450 uppercase tracking-widest block">
                       Promotion Banner #{idx}
                     </label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        name={key}
-                        onChange={handleFileChange}
-                        className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => saveImageSlot(key)}
-                        disabled={!images[key] || savingSlots[key]}
-                        className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold px-3 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
-                      >
-                        {savingSlots[key] ? 'Saving...' : 'Save Slot'}
-                      </button>
+                      <div className="flex flex-col space-y-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          name={key}
+                          onChange={handleFileChange}
+                          disabled={savingSlots[key]}
+                          className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all disabled:opacity-50"
+                        />
+                        {savingSlots[key] && (
+                          <span className="text-[9px] text-emerald-600 font-extrabold text-center animate-pulse">Uploading...</span>
+                        )}
+                      </div>
                     {imagePaths[key] && (
                       <div className="w-full h-24 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner">
                         <img
@@ -339,21 +303,19 @@ export default function AdminBranding() {
                     <label className="text-[9px] font-black text-slate-450 uppercase tracking-widest block">
                       Gallery Image #{idx}
                     </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      name={key}
-                      onChange={handleFileChange}
-                      className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-2.5 py-1 text-[11px] font-semibold outline-none transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => saveImageSlot(key)}
-                      disabled={!images[key] || savingSlots[key]}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-bold py-1.5 px-3 rounded-lg text-[9px] uppercase tracking-wider transition-all shadow-sm border border-emerald-700/10"
-                    >
-                      {savingSlots[key] ? 'Saving...' : 'Save Slot'}
-                    </button>
+                    <div className="flex flex-col space-y-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        name={key}
+                        onChange={handleFileChange}
+                        disabled={savingSlots[key]}
+                        className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-2.5 py-1 text-[11px] font-semibold outline-none transition-all disabled:opacity-50"
+                      />
+                      {savingSlots[key] && (
+                        <span className="text-[8px] text-emerald-600 font-extrabold text-center animate-pulse">Uploading...</span>
+                      )}
+                    </div>
                     {imagePaths[key] && (
                       <div className="w-full h-20 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner">
                         <img
@@ -426,21 +388,19 @@ export default function AdminBranding() {
                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
                     About Us Banner Image
                   </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    name="aboutus_image_1"
-                    onChange={handleFileChange}
-                    className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => saveImageSlot('aboutus_image_1')}
-                    disabled={!images.aboutus_image_1 || savingSlots.aboutus_image_1}
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold px-3 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
-                  >
-                    {savingSlots.aboutus_image_1 ? 'Saving...' : 'Save Slot'}
-                  </button>
+                  <div className="flex flex-col space-y-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      name="aboutus_image_1"
+                      onChange={handleFileChange}
+                      disabled={savingSlots.aboutus_image_1}
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all disabled:opacity-50"
+                    />
+                    {savingSlots.aboutus_image_1 && (
+                      <span className="text-[9px] text-emerald-600 font-extrabold text-center animate-pulse">Uploading...</span>
+                    )}
+                  </div>
                   {imagePaths.aboutus_image_1 && (
                     <div className="w-full h-28 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner mt-1.5">
                       <img
