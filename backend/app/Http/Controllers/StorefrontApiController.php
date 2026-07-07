@@ -23,6 +23,8 @@ class StorefrontApiController extends Controller
 
         $settings = [
             'store_name' => Setting::get('store_name', 'Cracker Demo'),
+            'store_logo' => Setting::get('store_logo', ''),
+            'store_favicon' => Setting::get('store_favicon', ''),
             'min_order_value' => Setting::get('min_order_value', 3800),
             'discount_percent' => Setting::get('discount_percent', 60),
             'store_whatsapp' => Setting::get('store_whatsapp', '919998887776'),

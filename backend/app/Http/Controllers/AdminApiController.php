@@ -530,7 +530,7 @@ class AdminApiController extends Controller
 
     public function updateBranding(Request $request)
     {
-        $imageFields = ['slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'];
+        $imageFields = ['store_logo', 'store_favicon', 'slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'];
         for ($i = 1; $i <= 10; $i++) {
             $imageFields[] = "gallery_image_{$i}";
         }
@@ -549,7 +549,7 @@ class AdminApiController extends Controller
         }
 
         $excludeFields = [
-            'slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'
+            'store_logo', 'store_favicon', 'slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'
         ];
         for ($i = 1; $i <= 10; $i++) {
             $excludeFields[] = "gallery_image_{$i}";
@@ -572,7 +572,7 @@ class AdminApiController extends Controller
             }
         }
 
-        $imageFields = ['slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'];
+        $imageFields = ['store_logo', 'store_favicon', 'slider_image_1', 'slider_image_2', 'slider_image_3', 'aboutus_image_1'];
         for ($i = 1; $i <= 10; $i++) {
             $imageFields[] = "gallery_image_{$i}";
         }

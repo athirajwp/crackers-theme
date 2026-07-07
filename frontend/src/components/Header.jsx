@@ -84,9 +84,17 @@ export default function Header() {
         <div className="container mx-auto px-4 flex justify-between items-center gap-4">
           {/* Logo / Branding */}
           <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <div className="bg-gold-500 p-2 rounded-xl shadow-md group-hover:rotate-6 transition-transform duration-300">
-              <i className="fa-solid fa-fire text-lg md:text-2xl text-crimson-600"></i>
-            </div>
+            {settings.store_logo ? (
+              <img
+                src={settings.store_logo.startsWith('data:') || settings.store_logo.startsWith('http') ? settings.store_logo : `/${settings.store_logo}`}
+                alt={settings.store_name}
+                className="h-10 md:h-12 w-auto object-contain rounded-xl shadow-sm"
+              />
+            ) : (
+              <div className="bg-gold-500 p-2 rounded-xl shadow-md group-hover:rotate-6 transition-transform duration-300">
+                <i className="fa-solid fa-fire text-lg md:text-2xl text-crimson-600"></i>
+              </div>
+            )}
             <div className="flex flex-col justify-center">
               <h1 className="text-sm md:text-base lg:text-xl font-black tracking-tight text-slate-900 leading-none">
                 {settings.store_name?.toUpperCase() || 'CRACKER SHOPE'}

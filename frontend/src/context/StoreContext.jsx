@@ -48,6 +48,17 @@ export const StoreProvider = ({ children }) => {
             delivery_charge: parseFloat(data.settings.delivery_charge || 150),
           };
           setSettings(parsedSettings);
+
+          // Update dynamic browser favicon if present
+          if (data.settings.store_favicon) {
+            const faviconUrl = data.settings.store_favicon.startsWith('data:') || data.settings.store_favicon.startsWith('http') 
+              ? data.settings.store_favicon 
+              : `/${data.settings.store_favicon}`;
+            const link = document.querySelector("link[rel~='icon']");
+            if (link) {
+              link.href = faviconUrl;
+            }
+          }
         }
         setLoading(false);
       })

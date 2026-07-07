@@ -26,6 +26,8 @@ export default function AdminBranding() {
 
   // Uploaded files
   const [images, setImages] = useState({
+    store_logo: null,
+    store_favicon: null,
     slider_image_1: null,
     slider_image_2: null,
     slider_image_3: null,
@@ -59,6 +61,8 @@ export default function AdminBranding() {
             ...data.settings,
           }));
           const paths = {
+            store_logo: data.settings.store_logo,
+            store_favicon: data.settings.store_favicon,
             slider_image_1: data.settings.slider_image_1,
             slider_image_2: data.settings.slider_image_2,
             slider_image_3: data.settings.slider_image_3,
@@ -309,6 +313,106 @@ export default function AdminBranding() {
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          {/* Logo & Favicon Customization */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-3">
+              Store logo & favicon
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {/* Store Logo */}
+              <div className="space-y-3">
+                <label className="text-[9px] font-black text-slate-450 uppercase tracking-widest block">
+                  Store Logo Image
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  name="store_logo"
+                  onChange={handleFileChange}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => saveImageSlot('store_logo')}
+                    disabled={savingSlots.store_logo}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                  >
+                    {savingSlots.store_logo ? 'Saving...' : 'Save Logo'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeImageSlot('store_logo')}
+                    disabled={!imagePaths.store_logo || savingSlots.store_logo}
+                    className="flex-1 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                  >
+                    Remove
+                  </button>
+                </div>
+                {imagePaths.store_logo && (
+                  <div className="w-full h-24 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img
+                      src={imagePaths.store_logo.startsWith('data:') || imagePaths.store_logo.startsWith('http') ? imagePaths.store_logo : `/${imagePaths.store_logo}`}
+                      alt="Store Logo"
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
+                )}
+                {!imagePaths.store_logo && (
+                  <div className="w-full h-24 bg-slate-50 border border-dashed border-slate-200 rounded-xl flex items-center justify-center text-[10px] text-slate-400 font-bold">
+                    No Custom Logo (Displays default icon)
+                  </div>
+                )}
+              </div>
+
+              {/* Store Favicon */}
+              <div className="space-y-3">
+                <label className="text-[9px] font-black text-slate-450 uppercase tracking-widest block">
+                  Browser Favicon (.ico / .png)
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  name="store_favicon"
+                  onChange={handleFileChange}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none transition-all"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => saveImageSlot('store_favicon')}
+                    disabled={savingSlots.store_favicon}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                  >
+                    {savingSlots.store_favicon ? 'Saving...' : 'Save Favicon'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeImageSlot('store_favicon')}
+                    disabled={!imagePaths.store_favicon || savingSlots.store_favicon}
+                    className="flex-1 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-100 disabled:border-slate-200 disabled:text-slate-400 text-white font-extrabold py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all"
+                  >
+                    Remove
+                  </button>
+                </div>
+                {imagePaths.store_favicon && (
+                  <div className="w-full h-24 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner flex items-center justify-center p-2">
+                    <img
+                      src={imagePaths.store_favicon.startsWith('data:') || imagePaths.store_favicon.startsWith('http') ? imagePaths.store_favicon : `/${imagePaths.store_favicon}`}
+                      alt="Store Favicon"
+                      className="h-10 w-10 object-contain"
+                    />
+                  </div>
+                )}
+                {!imagePaths.store_favicon && (
+                  <div className="w-full h-24 bg-slate-50 border border-dashed border-slate-200 rounded-xl flex items-center justify-center text-[10px] text-slate-400 font-bold">
+                    No Custom Favicon
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
