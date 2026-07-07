@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
-import { StoreProvider } from './context/StoreContext';
+import { StoreProvider, useStore } from './context/StoreContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Storefront from './pages/Storefront';
@@ -25,6 +25,26 @@ import AdminBranding from './pages/admin/AdminBranding';
 import AdminProfile from './pages/admin/AdminProfile';
 
 function PublicLayout() {
+  const { loading } = useStore();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900 text-white space-y-4">
+        {/* Animated logo/spinner */}
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-gold-500/20 border-t-gold-500 rounded-full animate-spin"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <i className="fa-solid fa-fire text-gold-500 text-2xl animate-pulse"></i>
+          </div>
+        </div>
+        <div className="text-center space-y-1">
+          <p className="text-sm font-black tracking-widest uppercase text-slate-300">Entering Fireworks Store...</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Loading secure connections</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Header />
