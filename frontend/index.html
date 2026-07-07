@@ -29,6 +29,19 @@
         }
     ?></script>
 
+    <!-- Dynamic company script parsed by Laravel PHP -->
+    <script id="laravel-company" type="application/json"><?php
+        if (isset($currentCompany)) {
+            echo json_encode([
+                'name' => $currentCompany->name
+            ]);
+        } else {
+            echo json_encode([
+                'name' => 'Cracker Demo'
+            ]);
+        }
+    ?></script>
+
     <script>
       (function() {
         const themeMaps = {

@@ -29,6 +29,19 @@
         }
     ?></script>
 
+    <!-- Dynamic company script parsed by Laravel PHP -->
+    <script id="laravel-company" type="application/json"><?php
+        if (isset($currentCompany)) {
+            echo json_encode([
+                'name' => $currentCompany->name
+            ]);
+        } else {
+            echo json_encode([
+                'name' => 'Cracker Demo'
+            ]);
+        }
+    ?></script>
+
     <script>
       (function() {
         const themeMaps = {
@@ -140,7 +153,7 @@
         100% { transform: translateX(-100%); }
       }
     </style>
-    <script type="module" crossorigin src="/build/assets/index-CtQilEQv.js"></script>
+    <script type="module" crossorigin src="/build/assets/index-uAOLw7yA.js"></script>
     <link rel="stylesheet" crossorigin href="/build/assets/index-CrlWzO9F.css">
   </head>
   <body class="bg-slate-50 text-slate-800 font-sans">
