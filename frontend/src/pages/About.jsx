@@ -79,7 +79,7 @@ export default function About() {
               <div className="absolute -inset-1.5 bg-gradient-to-tr from-gold-500 to-crimson-600 rounded-2xl opacity-10 blur-lg group-hover:opacity-20 transition-opacity duration-300"></div>
               <div className="relative bg-white border border-slate-200 p-2.5 rounded-2xl shadow-md overflow-hidden">
                 <img
-                  src={settings.aboutus_image_1 ? `/${settings.aboutus_image_1}` : 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80'}
+                  src={settings.aboutus_image_1 ? (settings.aboutus_image_1.startsWith('data:') || settings.aboutus_image_1.startsWith('http') ? settings.aboutus_image_1 : `/${settings.aboutus_image_1}`) : 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80'}
                   alt="Sivakasi Fireworks Warehouse"
                   className="w-full h-64 object-cover rounded-xl"
                 />
@@ -171,7 +171,7 @@ export default function About() {
                 >
                   <div className="w-full h-40 overflow-hidden rounded-xl bg-slate-100">
                     <img 
-                      src={src.startsWith('http') ? src : `/${src}`} 
+                      src={src.startsWith('http') || src.startsWith('data:') ? src : `/${src}`} 
                       alt={`Gallery view ${idx + 1}`} 
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       loading="lazy"
@@ -203,7 +203,7 @@ export default function About() {
               <i className="fa-solid fa-xmark text-sm"></i>
             </button>
             <img 
-              src={activeImage.startsWith('http') ? activeImage : `/${activeImage}`} 
+              src={activeImage.startsWith('http') || activeImage.startsWith('data:') ? activeImage : `/${activeImage}`} 
               alt="Gallery Zoomed" 
               className="max-w-full max-h-[80vh] object-contain rounded-2xl"
             />

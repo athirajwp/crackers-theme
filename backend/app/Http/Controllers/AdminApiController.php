@@ -540,7 +540,7 @@ class AdminApiController extends Controller
             $removeKey = $request->input('remove_image_key');
             if (in_array($removeKey, $imageFields)) {
                 $oldPath = Setting::get($removeKey);
-                if ($oldPath && file_exists(public_path($oldPath))) {
+                if ($oldPath && !str_starts_with($oldPath, 'data:') && file_exists(public_path($oldPath))) {
                     @unlink(public_path($oldPath));
                 }
                 Setting::set($removeKey, '', 'text');
@@ -588,14 +588,18 @@ class AdminApiController extends Controller
                     $field => 'image|mimes:jpeg,png,jpg,webp|max:3072'
                 ]);
 
+                // Read file contents and convert to Base64
+                $file = $request->file($field);
+                $fileData = file_get_contents($file->getRealPath());
+                $base64 = 'data:' . $file->getMimeType() . ';base64,' . base64_encode($fileData);
+
+                // Clean up old file from disk if it was a legacy file
                 $oldPath = Setting::get($field);
-                if ($oldPath && file_exists(public_path($oldPath))) {
+                if ($oldPath && !str_starts_with($oldPath, 'data:') && file_exists(public_path($oldPath))) {
                     @unlink(public_path($oldPath));
                 }
 
-                $fileName = time() . '_' . $field . '_' . uniqid() . '.' . $request->file($field)->extension();
-                $request->file($field)->move(public_path($uploadDir), $fileName);
-                Setting::set($field, $uploadDir . '/' . $fileName, 'text');
+                Setting::set($field, $base64, 'text');
             }
         }
 

@@ -377,7 +377,7 @@ export default function AdminBranding() {
                     {imagePaths[key] && (
                       <div className="w-full h-24 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner">
                         <img
-                          src={`/${imagePaths[key]}`}
+                          src={imagePaths[key].startsWith('data:') || imagePaths[key].startsWith('http') ? imagePaths[key] : `/${imagePaths[key]}`}
                           alt=""
                           className="w-full h-full object-cover"
                         />
@@ -430,7 +430,7 @@ export default function AdminBranding() {
                     {imagePaths[key] && (
                       <div className="w-full h-20 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner">
                         <img
-                          src={`/${imagePaths[key]}`}
+                          src={imagePaths[key].startsWith('data:') || imagePaths[key].startsWith('http') ? imagePaths[key] : `/${imagePaths[key]}`}
                           alt=""
                           className="w-full h-full object-cover"
                         />
@@ -527,7 +527,7 @@ export default function AdminBranding() {
                   {imagePaths.aboutus_image_1 && (
                     <div className="w-full h-28 bg-slate-100 border border-slate-200 rounded-xl overflow-hidden shadow-inner mt-1.5">
                       <img
-                        src={`/${imagePaths.aboutus_image_1}`}
+                        src={imagePaths.aboutus_image_1.startsWith('data:') || imagePaths.aboutus_image_1.startsWith('http') ? imagePaths.aboutus_image_1 : `/${imagePaths.aboutus_image_1}`}
                         alt="About Us Banner Preview"
                         className="w-full h-full object-cover"
                       />

@@ -37,7 +37,8 @@ export default function HeroSlider() {
   };
 
   const formatImageSrc = (src) => {
-    if (src.startsWith('http://') || src.startsWith('https://')) {
+    if (!src) return '';
+    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
       return src;
     }
     return '/' + src;
