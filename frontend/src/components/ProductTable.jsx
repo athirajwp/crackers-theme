@@ -214,7 +214,7 @@ export default function ProductTable() {
                               <td className="py-3.5 px-3 sm:px-4">
                                 <div className="flex flex-col gap-1.5">
                                   {/* Title on top */}
-                                  <h4 className="font-extrabold text-slate-800 text-xs sm:text-sm leading-normal">{prod.name}</h4>
+                                  <h4 className="font-extrabold text-slate-800 text-xs sm:text-sm leading-normal whitespace-nowrap truncate">{prod.name}</h4>
                                   
                                   {/* Image + Info below title */}
                                   <div className="flex items-center gap-3">
@@ -334,7 +334,7 @@ export default function ProductTable() {
                       return (
                         <div key={prod.id} className="p-3 sm:p-4 flex flex-col gap-2 hover:bg-slate-50/50 transition-colors border-b border-slate-150 last:border-b-0">
                           {/* Title on top */}
-                          <h4 className="font-extrabold text-slate-800 text-[11px] sm:text-xs leading-normal">{prod.name}</h4>
+                          <h4 className="font-extrabold text-slate-800 text-[11px] sm:text-xs leading-normal whitespace-nowrap truncate">{prod.name}</h4>
                           
                           {/* Specs, price, qty, subtotal underneath */}
                           <div className="flex items-center justify-between gap-1">
