@@ -209,22 +209,32 @@ export default function ProductTable() {
                           return (
                             <tr key={prod.id} className="hover:bg-slate-50/50 transition-colors">
                               {/* Product Info */}
-                              <td className="py-3.5 px-3 sm:px-4 flex items-center gap-2 sm:gap-3">
-                                <div 
-                                  className={`flex w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 items-center justify-center text-slate-400 overflow-hidden flex-shrink-0 ${prod.image ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
-                                  onClick={prod.image ? () => setPopProduct({ prod, catName: cat.name }) : undefined}
-                                >
-                                  {prod.image ? (
-                                    <img src={`/${prod.image}`} alt={prod.name} className="object-cover w-full h-full" />
-                                  ) : (
-                                    <i className="fa-solid fa-sparkles text-sm text-crimson-450/40"></i>
-                                  )}
-                                </div>
-                                <div className="space-y-1">
-                                  <h4 className="font-extrabold text-slate-800 text-xs leading-normal">{prod.name}</h4>
-                                  <div className="flex flex-wrap items-center gap-1.5">
-                                    <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest">{cat.name}</span>
-                                    <span className="sm:hidden text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-150 px-1.5 py-0.5 rounded-md font-mono">{prod.pack_size}</span>
+                              <td className="py-3.5 px-3 sm:px-4">
+                                <div className="flex flex-col gap-1.5">
+                                  {/* Title on top */}
+                                  <h4 className="font-extrabold text-slate-800 text-xs sm:text-sm leading-normal">{prod.name}</h4>
+                                  
+                                  {/* Image + Info below title */}
+                                  <div className="flex items-center gap-3">
+                                    {/* Left Image */}
+                                    <div 
+                                      className={`flex w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 items-center justify-center text-slate-400 overflow-hidden flex-shrink-0 ${prod.image ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                                      onClick={prod.image ? () => setPopProduct({ prod, catName: cat.name }) : undefined}
+                                    >
+                                      {prod.image ? (
+                                        <img src={`/${prod.image}`} alt={prod.name} className="object-cover w-full h-full" />
+                                      ) : (
+                                        <i className="fa-solid fa-sparkles text-sm text-crimson-450/40"></i>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Right Specs */}
+                                    <div className="flex flex-col items-start gap-1">
+                                      <span className="text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase tracking-widest">{cat.name}</span>
+                                      <span className="sm:hidden text-[9px] font-semibold text-slate-500 bg-slate-50 border border-slate-200/80 px-2 py-0.5 rounded-lg shadow-sm">
+                                        {prod.pack_size}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </td>
