@@ -15,15 +15,15 @@ export default defineConfig({
     allowedHosts: ['turbofan-depth-bruising.ngrok-free.dev'],
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:7000',
+        target: 'http://127.0.0.1:9000',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://127.0.0.1:7000',
+        target: 'http://127.0.0.1:9000',
         changeOrigin: true,
       },
       '/images': {
-        target: 'http://127.0.0.1:7000',
+        target: 'http://127.0.0.1:9000',
         changeOrigin: true,
       }
     }

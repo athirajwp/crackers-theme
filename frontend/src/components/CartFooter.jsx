@@ -76,32 +76,6 @@ export default function CartFooter({ onCheckoutClick }) {
 
           <span className="hidden sm:inline text-slate-350">|</span>
 
-          {/* MRP */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[9px] text-slate-400 uppercase tracking-wider font-extrabold">Original MRP:</span>
-            <span className="line-through font-semibold text-slate-450">₹{formatCurrency(totalMrp)}</span>
-          </div>
-
-          <span className="hidden sm:inline text-slate-350">|</span>
-
-          {/* Savings */}
-          <div className="text-crimson-750 bg-crimson-50 border border-crimson-100 px-2.5 py-0.5 rounded-lg shadow-sm flex items-center gap-1.5 font-medium">
-            <span className="text-[9px] text-crimson-500 uppercase tracking-wider font-extrabold">Savings:</span>
-            <strong className="font-extrabold text-xs">₹{formatCurrency(totalDiscount)}</strong>
-          </div>
-
-          {enableMinOrder && (
-            <>
-              <span className="hidden sm:inline text-slate-350">|</span>
-              <div className="flex items-center gap-1.5 text-slate-800">
-                <span className="text-[9px] text-slate-400 uppercase tracking-wider font-extrabold">Min Order:</span>
-                <strong className="font-bold text-slate-700">₹{formatCurrency(minOrderValue)}</strong>
-              </div>
-            </>
-          )}
-
-          <span className="hidden sm:inline text-slate-350">|</span>
-
           {/* Net Payable Amount */}
           <div className="flex items-center gap-1.5 text-slate-800">
             <span className="text-[9px] text-slate-400 uppercase tracking-wider font-extrabold">Net Payable:</span>
