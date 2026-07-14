@@ -160,7 +160,9 @@ export default function ProductTable() {
         {/* Conditional Layout Rendering */}
         {viewMode === 'flex' ? (
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto sm:overflow-visible">
+            
+            {/* Desktop View Table */}
+            <div className="hidden sm:block overflow-x-auto sm:overflow-visible">
               <table className="w-full border-collapse text-left text-xs">
                 <thead>
                   <tr className="bg-slate-100/60 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px] select-none">
@@ -247,7 +249,7 @@ export default function ProductTable() {
                               {/* Prices */}
                               <td className="py-3.5 px-3 sm:px-4 text-right">
                                 <div className="text-slate-400 text-[10px] line-through">₹{formatCurrency(prod.mrp)}</div>
-                                <div className="text-crimson-650 font-extrabold">₹{formatCurrency(prod.selling_price)}</div>
+                                <div className="text-crimson-655 font-extrabold">₹{formatCurrency(prod.selling_price)}</div>
                               </td>
 
                               {/* Qty selectors */}
@@ -295,6 +297,113 @@ export default function ProductTable() {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile View List */}
+            <div className="block sm:hidden divide-y divide-slate-150">
+              {categories.map((cat) => {
+                if (!shouldShowCategory(cat.slug)) return null;
+
+                const isCollapsed = collapsedCategories.has(cat.slug);
+                const filteredProducts = cat.products.filter((prod) => shouldShowProduct(cat.slug, prod));
+                if (filteredProducts.length === 0) return null;
+
+                return (
+                  <React.Fragment key={cat.id}>
+                    {/* Category Header (Mobile) */}
+                    <div
+                      onClick={() => toggleCategoryCollapse(cat.slug)}
+                      className="bg-slate-50 font-bold text-slate-700 border-b border-slate-200/80 select-none cursor-pointer hover:bg-slate-100 transition-colors py-3 px-3.5 flex items-center justify-between text-crimson-655 tracking-wider"
+                    >
+                      <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-fire text-[10px] text-crimson-500"></i>
+                        <span>{cat.name}</span>
+                      </div>
+                      <i
+                        className={`fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-200 ${
+                          isCollapsed ? '-rotate-90' : 'rotate-0'
+                        }`}
+                      ></i>
+                    </div>
+
+                    {/* Products list within Category (Mobile) */}
+                    {!isCollapsed && filteredProducts.map((prod) => {
+                      const cartItem = cart[prod.id];
+                      const qty = cartItem ? cartItem.qty : 0;
+                      const rowTotal = qty * parseFloat(prod.selling_price);
+
+                      return (
+                        <div key={prod.id} className="p-3 sm:p-4 flex flex-col gap-2 hover:bg-slate-50/50 transition-colors border-b border-slate-150 last:border-b-0">
+                          {/* Title on top */}
+                          <h4 className="font-extrabold text-slate-800 text-[11px] sm:text-xs leading-normal">{prod.name}</h4>
+                          
+                          {/* Specs, price, qty, subtotal underneath */}
+                          <div className="flex items-center justify-between gap-1">
+                            
+                            {/* Image + Specs */}
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div 
+                                className={`flex w-9 h-9 rounded-lg bg-slate-50 border border-slate-200 items-center justify-center text-slate-400 overflow-hidden flex-shrink-0 ${prod.image ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                                onClick={prod.image ? () => setPopProduct({ prod, catName: cat.name }) : undefined}
+                              >
+                                {prod.image ? (
+                                  <img src={`/${prod.image}`} alt={prod.name} className="object-cover w-full h-full" />
+                                ) : (
+                                  <i className="fa-solid fa-sparkles text-xs text-crimson-450/40"></i>
+                                )}
+                              </div>
+                              <div className="flex flex-col items-start min-w-0">
+                                <span className="text-[7.5px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[65px] leading-tight mb-0.5">{cat.name}</span>
+                                <span className="text-[8.5px] font-semibold text-slate-500 bg-slate-50 border border-slate-200/80 px-1.5 py-0.5 rounded-lg shadow-sm whitespace-nowrap leading-none">
+                                  {prod.pack_size}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Price */}
+                            <div className="text-left flex-shrink-0 px-1">
+                              <div className="text-slate-400 text-[9px] line-through font-bold leading-tight">₹{formatCurrency(prod.mrp)}</div>
+                              <div className="text-slate-800 font-extrabold text-[11px] leading-tight">₹{formatCurrency(prod.selling_price)}</div>
+                            </div>
+
+                            {/* Qty selectors */}
+                            <div className="inline-flex items-center bg-slate-100 border border-slate-200 rounded-lg p-0.5 select-none flex-shrink-0">
+                              <button
+                                onClick={() => decreaseQty(prod.id)}
+                                className="w-5 h-5 text-slate-655 hover:text-slate-900 hover:bg-white rounded flex items-center justify-center font-bold text-xs transition-colors shadow-sm"
+                              >
+                                <i className="fa-solid fa-minus text-[7px]"></i>
+                              </button>
+                              <input
+                                type="number"
+                                value={qty || ''}
+                                onChange={(e) => updateQty(prod, e.target.value)}
+                                placeholder="0"
+                                className="w-7 text-center bg-transparent border-0 text-[10px] font-black text-slate-800 placeholder-slate-400 focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              />
+                              <button
+                                onClick={() => increaseQty(prod)}
+                                className="w-5 h-5 text-slate-655 hover:text-slate-900 hover:bg-white rounded flex items-center justify-center font-bold text-xs transition-colors shadow-sm"
+                              >
+                                <i className="fa-solid fa-plus text-[7px]"></i>
+                              </button>
+                            </div>
+
+                            {/* Row total */}
+                            <div className="text-right flex-shrink-0 min-w-[3.5rem]">
+                              <span className="font-extrabold text-[11px] text-crimson-600">
+                                {qty > 0 ? `₹${formatCurrency(rowTotal)}` : '—'}
+                              </span>
+                            </div>
+
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+
           </div>
         ) : (
           /* Grid View Layout */
