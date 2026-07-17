@@ -176,9 +176,14 @@ class CheckoutController extends Controller
                 $orderId = $order->id;
                 $tenantDb = config('database.connections.' . config('database.default') . '.database');
                 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                    $phpPath = '"' . PHP_BINARY . '"';
-                    $artisanPath = '"' . base_path('artisan') . '"';
-                    pclose(popen("start /B {$phpPath} {$artisanPath} order:send-email {$orderId} --tenant-db={$tenantDb} > NUL 2>&1", "r"));
+                    // Use the bundled PHP binary + artisan.bat (avoids PHP_BINARY pointing to wrong PHP)
+                    // Note: start /B needs an explicit empty title "" so the first quoted path
+                    // isn't mistaken for the window title (which would cause Windows to try running '-c' as a program)
+                    $phpExe  = str_replace('/', DIRECTORY_SEPARATOR, base_path('.tools/php/php.exe'));
+                    $phpIni  = str_replace('/', DIRECTORY_SEPARATOR, base_path('.tools/php/php.ini'));
+                    $artisan = str_replace('/', DIRECTORY_SEPARATOR, base_path('artisan'));
+                    $cmd = "start /B \"\" \"{$phpExe}\" -c \"{$phpIni}\" \"{$artisan}\" order:send-email {$orderId} --tenant-db={$tenantDb} > NUL 2>&1";
+                    pclose(popen($cmd, "r"));
                 } else {
                     $phpPath = escapeshellarg(PHP_BINARY);
                     $artisanPath = escapeshellarg(base_path('artisan'));

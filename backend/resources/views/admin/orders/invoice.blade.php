@@ -141,8 +141,8 @@
                 <td>
                     <div class="header-brand">{{ strtoupper(App\Models\Setting::get('store_name', 'Cracker Demo')) }}</div>
                     <div style="font-size: 10px; margin-top: 3px;">
-                        Virudhunagar to Sivakasi Main Road, Sivakasi.<br>
-                        Phone: {{ App\Models\Setting::get('store_phone', '+91 7010619528') }} | Email: {{ App\Models\Setting::get('store_email', 'crackerdemo@gmail.com') }}
+                        {{ App\Models\Setting::get('store_address', 'Virudhunagar to Sivakasi Main Road, Sivakasi') }}<br>
+                        Phone: {{ App\Models\Setting::get('store_phone', '+91 9998887776') }} | Email: {{ App\Models\Setting::get('store_email', 'store@example.com') }}
                     </div>
                 </td>
                 <td class="header-details">

@@ -26,18 +26,24 @@ Artisan::command('order:send-email {orderId} {--tenant-db=}', function ($orderId
     }
 
     try {
-        $adminEmail = Setting::get('store_email', 'athiraj.vnr@gmail.com');
+        $adminEmail   = Setting::get('store_email', config('mail.from.address'));
         $customerEmail = $order->email;
 
-        $recipients = [$adminEmail];
-        if (!empty($customerEmail)) {
-            $recipients[] = $customerEmail;
-        }
-        $recipients = array_unique(array_filter($recipients));
-
         $order->load('items');
-        Mail::to($recipients)->send(new AdminInvoiceMail($order));
-        $this->info("Email sent successfully for order {$order->order_number}");
+
+        // Send admin notification (invoice view)
+        if (!empty($adminEmail)) {
+            Mail::to($adminEmail)->send(new AdminInvoiceMail($order));
+            $this->info("Admin email sent to {$adminEmail}");
+        }
+
+        // Send customer confirmation (friendly view) — only if customer provided their email
+        if (!empty($customerEmail)) {
+            Mail::to($customerEmail)->send(new \App\Mail\CustomerOrderMail($order));
+            $this->info("Customer email sent to {$customerEmail}");
+        }
+
+        $this->info("Email dispatch complete for order {$order->order_number}");
     } catch (\Exception $e) {
         Log::error('Failed to send order email notification in background: ' . $e->getMessage());
         $this->error('Failed: ' . $e->getMessage());

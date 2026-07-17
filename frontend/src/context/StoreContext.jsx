@@ -19,6 +19,7 @@ export const StoreProvider = ({ children }) => {
     enable_min_order: 'yes',
     enable_promo_codes: 'yes',
     enable_tax_delivery: 'no',
+    enable_fireworks: 'yes',
     tax_percent: 18,
     delivery_charge: 150,
   });

@@ -10,6 +10,7 @@ import PriceList from './pages/PriceList';
 import TrackOrder from './pages/TrackOrder';
 import CheckoutSuccess from './pages/CheckoutSuccess';
 import Contact from './pages/Contact';
+import Fireworks from './components/Fireworks';
 
 // Admin imports
 import AdminLogin from './pages/admin/AdminLogin';
@@ -25,7 +26,7 @@ import AdminBranding from './pages/admin/AdminBranding';
 import AdminProfile from './pages/admin/AdminProfile';
 
 function PublicLayout() {
-  const { loading } = useStore();
+  const { loading, settings } = useStore();
   const [companyName, setCompanyName] = useState('Sivakasi Fireworks');
 
   useEffect(() => {
@@ -168,6 +169,7 @@ function PublicLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
+      {settings?.enable_fireworks === 'yes' && <Fireworks />}
       <Header />
       <main className="flex-grow">
         <Outlet />

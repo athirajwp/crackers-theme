@@ -288,9 +288,17 @@ class AdminApiController extends Controller
             ->orderBy('sort_order', 'asc')
             ->get();
 
+        $settings = [
+            'store_name' => Setting::get('store_name', 'Cracker Demo'),
+            'store_address' => Setting::get('store_address', 'Virudhunagar to Sivakasi Main Road, Sivakasi'),
+            'store_phone' => Setting::get('store_phone', '+91 9998887776'),
+            'store_email' => Setting::get('store_email', 'store@example.com'),
+        ];
+
         return response()->json([
             'order' => $order,
-            'categories' => $categories
+            'categories' => $categories,
+            'settings' => $settings
         ]);
     }
 
@@ -423,6 +431,7 @@ class AdminApiController extends Controller
             'enable_min_order' => Setting::get('enable_min_order', 'yes'),
             'enable_promo_codes' => Setting::get('enable_promo_codes', 'yes'),
             'enable_tax_delivery' => Setting::get('enable_tax_delivery', 'no'),
+            'enable_fireworks' => Setting::get('enable_fireworks', 'yes'),
             'tax_percent' => Setting::get('tax_percent', 18),
             'delivery_charge' => Setting::get('delivery_charge', 150),
         ];
@@ -448,6 +457,7 @@ class AdminApiController extends Controller
             'enable_min_order' => 'required|in:yes,no',
             'enable_promo_codes' => 'required|in:yes,no',
             'enable_tax_delivery' => 'required|in:yes,no',
+            'enable_fireworks' => 'required|in:yes,no',
             'tax_percent' => 'required|numeric|min:0|max:100',
             'delivery_charge' => 'required|numeric|min:0',
             'store_upi_qr' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
@@ -468,6 +478,7 @@ class AdminApiController extends Controller
         Setting::set('enable_min_order', $request->enable_min_order, 'text');
         Setting::set('enable_promo_codes', $request->enable_promo_codes, 'text');
         Setting::set('enable_tax_delivery', $request->enable_tax_delivery, 'text');
+        Setting::set('enable_fireworks', $request->enable_fireworks, 'text');
         Setting::set('tax_percent', $request->tax_percent, 'number');
         Setting::set('delivery_charge', $request->delivery_charge, 'number');
 

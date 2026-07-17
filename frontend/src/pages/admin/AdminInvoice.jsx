@@ -43,7 +43,12 @@ export default function AdminInvoice() {
     );
   }
 
-  const { order } = data;
+  const { order, settings = {
+    store_name: 'Cracker Demo',
+    store_address: 'Virudhunagar to Sivakasi Main Road, Sivakasi.',
+    store_phone: '+91 7010619528',
+    store_email: 'crackerdemo@gmail.com'
+  } } = data;
 
   const printStyles = `
     body {
@@ -163,10 +168,10 @@ export default function AdminInvoice() {
           <tbody>
             <tr>
               <td>
-                <div className="header-brand">AATHISHA CRACKERS</div>
+                <div className="header-brand">{settings.store_name?.toUpperCase()}</div>
                 <div style={{ fontSize: '10px', marginTop: '3px' }}>
-                  Virudhunagar to Sivakasi Main Road, Sivakasi.<br />
-                  Phone: +91 7010619528 | Email: crackerdemo@gmail.com
+                  {settings.store_address}<br />
+                  Phone: {settings.store_phone} | Email: {settings.store_email}
                 </div>
               </td>
               <td className="header-details">
@@ -248,7 +253,7 @@ export default function AdminInvoice() {
             <tr>
               <td className="sign-col">Customer Signature</td>
               <td className="sign-col text-right">
-                For <strong>Aathisha Crackers</strong>
+                For <strong>{settings.store_name}</strong>
               </td>
             </tr>
           </tbody>

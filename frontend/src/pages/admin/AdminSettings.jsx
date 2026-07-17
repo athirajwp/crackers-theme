@@ -25,6 +25,7 @@ export default function AdminSettings() {
     enable_min_order: 'yes',
     enable_promo_codes: 'yes',
     enable_tax_delivery: 'no',
+    enable_fireworks: 'yes',
     tax_percent: 18,
     delivery_charge: 150,
   });
@@ -299,6 +300,21 @@ export default function AdminSettings() {
                   >
                     <option value="yes">Enable GST & Shipping</option>
                     <option value="no">Disable / Free</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                    Enable Fireworks Burst Animation
+                  </label>
+                  <select
+                    name="enable_fireworks"
+                    value={formData.enable_fireworks}
+                    onChange={handleChange}
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-4 py-2.5 text-xs font-bold outline-none transition-all"
+                  >
+                    <option value="yes">Yes (Enabled)</option>
+                    <option value="no">No (Disabled)</option>
                   </select>
                 </div>
 

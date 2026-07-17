@@ -36,6 +36,7 @@ class StorefrontApiController extends Controller
             'enable_min_order' => Setting::get('enable_min_order', 'yes'),
             'enable_promo_codes' => Setting::get('enable_promo_codes', 'yes'),
             'enable_tax_delivery' => Setting::get('enable_tax_delivery', 'no'),
+            'enable_fireworks' => Setting::get('enable_fireworks', 'yes'),
             'tax_percent' => Setting::get('tax_percent', 18),
             'delivery_charge' => Setting::get('delivery_charge', 150),
 
