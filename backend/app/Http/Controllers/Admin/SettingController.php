@@ -66,7 +66,7 @@ class SettingController extends Controller
             'delivery_charge' => 'required|numeric|min:0',
             
             // UPI QR validation
-            'store_upi_qr' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
+            'store_upi_qr' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
         ];
 
         $request->validate($rules);

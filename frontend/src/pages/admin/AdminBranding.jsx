@@ -135,10 +135,11 @@ export default function AdminBranding() {
         setImages((prev) => ({ ...prev, [key]: null }));
         fetchBranding();
       } else {
+        const errorMsg = data.message || (data.errors ? Object.values(data.errors).flat().join(' ') : null) || data.error || 'Failed to upload image.';
         Swal.fire({
           icon: 'error',
           title: 'Upload Failed',
-          text: data.error || 'Failed to upload image.',
+          text: errorMsg,
         });
       }
     } catch (err) {
@@ -238,10 +239,11 @@ export default function AdminBranding() {
         });
         fetchBranding();
       } else {
+        const errorMsg = data.message || (data.errors ? Object.values(data.errors).flat().join(' ') : null) || data.error || 'Failed to update branding options.';
         Swal.fire({
           icon: 'error',
           title: 'Save Failed',
-          text: data.error || 'Failed to update branding options.',
+          text: errorMsg,
         });
       }
     } catch (err) {

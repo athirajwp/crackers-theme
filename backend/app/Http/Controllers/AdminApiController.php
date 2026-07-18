@@ -460,7 +460,7 @@ class AdminApiController extends Controller
             'enable_fireworks' => 'required|in:yes,no',
             'tax_percent' => 'required|numeric|min:0|max:100',
             'delivery_charge' => 'required|numeric|min:0',
-            'store_upi_qr' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
+            'store_upi_qr' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
         ]);
 
         Setting::set('store_name', $request->store_name, 'text');
@@ -597,7 +597,7 @@ class AdminApiController extends Controller
         foreach ($imageFields as $field) {
             if ($request->hasFile($field)) {
                 $request->validate([
-                    $field => 'image|mimes:jpeg,png,jpg,webp|max:3072'
+                    $field => 'image|mimes:jpeg,png,jpg,webp|max:20480'
                 ]);
 
                 // Read file contents and convert to Base64

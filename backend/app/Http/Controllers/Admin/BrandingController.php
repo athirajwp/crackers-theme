@@ -116,7 +116,7 @@ class BrandingController extends Controller
         foreach ($imageFields as $field) {
             if ($request->hasFile($field)) {
                 $request->validate([
-                    $field => 'image|mimes:jpeg,png,jpg,webp|max:3072'
+                    $field => 'image|mimes:jpeg,png,jpg,webp|max:20480'
                 ]);
 
                 $oldPath = Setting::get($field);
