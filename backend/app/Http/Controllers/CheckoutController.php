@@ -22,11 +22,11 @@ class CheckoutController extends Controller
             'phone' => 'required|string|max:20',
             'whatsapp' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
-            'address' => 'required|string',
+            'address' => 'nullable|string',
             'landmark' => 'nullable|string|max:255',
-            'city' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'pincode' => 'required|string|max:10',
+            'city' => 'nullable|string|max:255',
+            'state' => 'nullable|string|max:255',
+            'pincode' => 'nullable|string|max:10',
             'items' => 'required|array',
             'items.*.id' => 'required|exists:products,id',
             'items.*.qty' => 'required|integer|min:0',
@@ -144,11 +144,11 @@ class CheckoutController extends Controller
                 'phone' => $request->phone,
                 'whatsapp' => $request->whatsapp ?? $request->phone,
                 'email' => $request->email,
-                'address' => $request->address,
-                'landmark' => $request->landmark,
-                'city' => $request->city,
-                'state' => $request->state,
-                'pincode' => $request->pincode,
+                'address' => $request->address ?? '',
+                'landmark' => $request->landmark ?? '',
+                'city' => $request->city ?? '',
+                'state' => $request->state ?? '',
+                'pincode' => $request->pincode ?? '',
                 'subtotal' => $subtotal,
                 'discount_amount' => $discountAmount,
                 'net_amount' => $finalNet,
@@ -175,20 +175,19 @@ class CheckoutController extends Controller
             try {
                 $orderId = $order->id;
                 $tenantDb = config('database.connections.' . config('database.default') . '.database');
+                
                 if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                    // Use the bundled PHP binary + artisan.bat (avoids PHP_BINARY pointing to wrong PHP)
-                    // Note: start /B needs an explicit empty title "" so the first quoted path
-                    // isn't mistaken for the window title (which would cause Windows to try running '-c' as a program)
                     $phpExe  = str_replace('/', DIRECTORY_SEPARATOR, base_path('.tools/php/php.exe'));
                     $phpIni  = str_replace('/', DIRECTORY_SEPARATOR, base_path('.tools/php/php.ini'));
                     $artisan = str_replace('/', DIRECTORY_SEPARATOR, base_path('artisan'));
-                    $cmd = "start /B \"\" \"{$phpExe}\" -c \"{$phpIni}\" \"{$artisan}\" order:send-email {$orderId} --tenant-db={$tenantDb} > NUL 2>&1";
-                    pclose(popen($cmd, "r"));
+                    $cmd = "\"{$phpExe}\" -c \"{$phpIni}\" \"{$artisan}\" order:send-email {$orderId} --tenant-db={$tenantDb}";
                 } else {
-                    $phpPath = escapeshellarg(PHP_BINARY);
-                    $artisanPath = escapeshellarg(base_path('artisan'));
-                    exec("{$phpPath} {$artisanPath} order:send-email {$orderId} --tenant-db={$tenantDb} > /dev/null 2>&1 &");
+                    $phpPath = PHP_BINARY;
+                    $artisanPath = base_path('artisan');
+                    $cmd = "{$phpPath} {$artisanPath} order:send-email {$orderId} --tenant-db={$tenantDb}";
                 }
+
+                \Illuminate\Support\Facades\Process::path(base_path())->start($cmd);
             } catch (\Exception $e) {
                 Log::error('Failed to dispatch background email: ' . $e->getMessage());
             }

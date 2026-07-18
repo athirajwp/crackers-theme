@@ -253,7 +253,7 @@ export default function AdminInvoice() {
             <tr>
               <td className="sign-col">Customer Signature</td>
               <td className="sign-col text-right">
-                For <strong>{settings.store_name}</strong>
+                For <strong>Customer</strong>
               </td>
             </tr>
           </tbody>

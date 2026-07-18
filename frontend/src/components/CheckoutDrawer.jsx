@@ -208,12 +208,10 @@ export default function CheckoutDrawer({ isOpen, onClose }) {
 
                 <div>
                   <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                    <i className="fa-solid fa-location-dot mr-1 text-crimson-500/80"></i>Delivery Address{' '}
-                    <span className="text-crimson-500">*</span>
+                    <i className="fa-solid fa-location-dot mr-1 text-crimson-500/80"></i>Delivery Address
                   </label>
                   <textarea
                     name="address"
-                    required
                     rows="3"
                     placeholder="Full Delivery Address"
                     value={form.address}
@@ -238,13 +236,11 @@ export default function CheckoutDrawer({ isOpen, onClose }) {
                   </div>
                   <div>
                     <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                      <i className="fa-solid fa-city mr-1 text-crimson-500/80"></i>City / Town{' '}
-                      <span className="text-crimson-500">*</span>
+                      <i className="fa-solid fa-city mr-1 text-crimson-500/80"></i>City / Town
                     </label>
                     <input
                       type="text"
                       name="city"
-                      required
                       placeholder="City or Town"
                       value={form.city}
                       onChange={handleInputChange}
@@ -256,12 +252,10 @@ export default function CheckoutDrawer({ isOpen, onClose }) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                      <i className="fa-solid fa-globe mr-1 text-crimson-500/80"></i>State{' '}
-                      <span className="text-crimson-500">*</span>
+                      <i className="fa-solid fa-globe mr-1 text-crimson-500/80"></i>State
                     </label>
                     <select
                       name="state"
-                      required
                       value={form.state}
                       onChange={handleInputChange}
                       className="w-full bg-slate-50 border border-slate-200 focus:border-slate-350 focus:bg-white rounded-xl px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none transition-all"
@@ -276,13 +270,11 @@ export default function CheckoutDrawer({ isOpen, onClose }) {
                   </div>
                   <div>
                     <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                      <i className="fa-solid fa-map-location mr-1 text-crimson-500/80"></i>Pin Code{' '}
-                      <span className="text-crimson-500">*</span>
+                      <i className="fa-solid fa-map-location mr-1 text-crimson-500/80"></i>Pin Code
                     </label>
                     <input
                       type="text"
                       name="pincode"
-                      required
                       placeholder="Pin Code"
                       value={form.pincode}
                       onChange={handleInputChange}

@@ -230,7 +230,7 @@
                     Customer Signature
                 </td>
                 <td class="sign-col text-right">
-                    For <strong>{{ App\Models\Setting::get('store_name', 'Cracker Demo') }}</strong>
+                    For <strong>Customer</strong>
                 </td>
             </tr>
         </table>
