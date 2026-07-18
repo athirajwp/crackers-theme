@@ -168,10 +168,15 @@ function PublicLayout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
+    <div className="min-h-screen flex flex-col bg-crimson-50 relative overflow-hidden">
+      {/* Background soft festive glow bursts */}
+      <div className="absolute left-0 top-0 w-96 h-96 rounded-full pointer-events-none opacity-20" style={{background: 'radial-gradient(circle, rgba(220,38,38,0.18) 0%, rgba(234,179,8,0.12) 50%, transparent 70%)', filter: 'blur(40px)'}}></div>
+      <div className="absolute right-0 top-1/4 w-[500px] h-[500px] rounded-full pointer-events-none opacity-15" style={{background: 'radial-gradient(circle, rgba(251,191,36,0.25) 0%, rgba(220,38,38,0.12) 50%, transparent 70%)', filter: 'blur(50px)'}}></div>
+      <div className="absolute left-1/4 bottom-1/4 w-[400px] h-[400px] rounded-full pointer-events-none opacity-15" style={{background: 'radial-gradient(circle, rgba(220,38,38,0.15) 0%, rgba(251,191,36,0.12) 50%, transparent 70%)', filter: 'blur(40px)'}}></div>
+
       {settings?.enable_fireworks === 'yes' && <Fireworks />}
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow relative z-10">
         <Outlet />
       </main>
       <Footer />

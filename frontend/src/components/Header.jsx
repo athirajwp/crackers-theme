@@ -37,15 +37,35 @@ export default function Header() {
 
   const getGoogleMapsUrl = () => {
     if (settings.store_map_iframe) {
-      // 1. If user input contains an iframe, extract the src URL
+      let url = '';
       const match = settings.store_map_iframe.match(/src=["']([^"']+)["']/);
       if (match && match[1]) {
-        return match[1];
+        url = match[1];
+      } else if (settings.store_map_iframe.trim().startsWith('http')) {
+        url = settings.store_map_iframe.trim();
       }
       
-      // 2. If it's a raw URL link starting with http
-      if (settings.store_map_iframe.trim().startsWith('http')) {
-        return settings.store_map_iframe.trim();
+      if (url) {
+        // Try to parse 'q' query parameter (e.g., embed/v1/place?q=...)
+        try {
+          const parsedUrl = new URL(url);
+          const qParam = parsedUrl.searchParams.get('q');
+          if (qParam) {
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(qParam)}`;
+          }
+        } catch(e) {}
+
+        // Match pb format !2s... (standard Google Maps Embed pb query string)
+        const queryMatch = url.match(/!2s([^!&]+)/);
+        if (queryMatch && queryMatch[1]) {
+          try {
+            const decodedQuery = decodeURIComponent(queryMatch[1]);
+            return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(decodedQuery)}`;
+          } catch (e) {}
+        }
+        
+        // Return parsed URL directly if we couldn't extract a search query
+        return url;
       }
     }
     

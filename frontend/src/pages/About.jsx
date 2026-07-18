@@ -30,7 +30,7 @@ export default function About() {
   const displayImages = galleryImages.length > 0 ? galleryImages : defaultGallery;
 
   return (
-    <div className="relative text-slate-800 select-none bg-slate-50/50 pb-16">
+    <div className="relative text-slate-800 select-none bg-transparent pb-16">
       {/* 1. Premium Electro Header Page Banner */}
       <section className="relative bg-crimson-600 py-16 border-b border-crimson-700 shadow-inner">
         <div className="container mx-auto px-4 text-center space-y-3 relative z-10">
