@@ -26,6 +26,7 @@ Artisan::command('order:send-email {orderId} {--tenant-db=}', function ($orderId
     }
 
     try {
+        Log::info("Starting background email dispatch for order {$order->order_number} (ID: {$orderId})");
         $adminEmail   = Setting::get('store_email', config('mail.from.address'));
         $customerEmail = $order->email;
 
@@ -44,6 +45,7 @@ Artisan::command('order:send-email {orderId} {--tenant-db=}', function ($orderId
         }
 
         $this->info("Email dispatch complete for order {$order->order_number}");
+        Log::info("Background email dispatch completed successfully for order {$order->order_number}");
     } catch (\Exception $e) {
         Log::error('Failed to send order email notification in background: ' . $e->getMessage());
         $this->error('Failed: ' . $e->getMessage());

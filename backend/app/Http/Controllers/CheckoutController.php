@@ -171,17 +171,27 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Send order invoice email to admin and customer synchronously
+            // Send order invoice email to admin and customer in the background
             try {
                 $orderId = $order->id;
                 $tenantDb = config('database.connections.' . config('database.default') . '.database');
                 
-                \Illuminate\Support\Facades\Artisan::call('order:send-email', [
-                    'orderId' => $orderId,
-                    '--tenant-db' => $tenantDb
-                ]);
+                $artisanPath = base_path('artisan');
+                $phpPath = (new \Symfony\Component\Process\PhpExecutableFinder())->find(false);
+                
+                if (empty($phpPath) || str_contains($phpPath, 'cgi') || str_contains($phpPath, 'fpm') || str_contains($phpPath, 'apache')) {
+                    $phpPath = 'php';
+                }
+
+                if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+                    $cmd = 'start /B "" ' . escapeshellarg($phpPath) . ' ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb);
+                    pclose(popen($cmd, 'r'));
+                } else {
+                    $cmd = escapeshellarg($phpPath) . ' ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb) . ' > /dev/null 2>&1 &';
+                    exec($cmd);
+                }
             } catch (\Exception $e) {
-                Log::error('Failed to send order email: ' . $e->getMessage());
+                Log::error('Failed to send order email in background: ' . $e->getMessage());
             }
 
             return response()->json([
