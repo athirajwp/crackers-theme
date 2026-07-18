@@ -31,7 +31,20 @@ class AppServiceProvider extends ServiceProvider
         // Share null as default to prevent view variable errors
         view()->share('currentCompany', null);
 
-
+        // 2. Set SMTP mail config fallback if environment variables are not defined (e.g. on Render)
+        if (empty(config('mail.mailers.smtp.username')) || config('mail.mailers.smtp.username') === 'null') {
+            config([
+                'mail.default' => 'smtp',
+                'mail.mailers.smtp.transport' => 'smtp',
+                'mail.mailers.smtp.host' => 'smtp.gmail.com',
+                'mail.mailers.smtp.port' => 465,
+                'mail.mailers.smtp.encryption' => 'ssl',
+                'mail.mailers.smtp.username' => 'athiraj.vnr@gmail.com',
+                'mail.mailers.smtp.password' => 'qbvg pfmj urol tsvv',
+                'mail.from.address' => 'athiraj.vnr@gmail.com',
+                'mail.from.name' => 'Athiraj',
+            ]);
+        }
     }
 
 }
