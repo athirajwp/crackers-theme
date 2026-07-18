@@ -39,7 +39,10 @@ class AdminInvoiceMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.admin_invoice',
+            view: 'admin.orders.invoice',
+            with: [
+                'is_email_or_pdf' => true,
+            ]
         );
     }
 
@@ -48,6 +51,14 @@ class AdminInvoiceMail extends Mailable
      */
     public function attachments(): array
     {
-        return [];
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.invoice', [
+            'order' => $this->order,
+            'is_email_or_pdf' => true,
+        ]);
+
+        return [
+            \Illuminate\Mail\Mailables\Attachment::fromData(fn () => $pdf->output(), 'invoice-' . $this->order->order_number . '.pdf')
+                ->withMime('application/pdf'),
+        ];
     }
 }

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice - {{ $order->order_number }}</title>
     <style>
@@ -13,6 +14,10 @@
             padding: 30px;
             font-size: 12px;
             line-height: 1.4;
+        }
+
+        .rupee {
+            font-family: 'DejaVu Sans', sans-serif;
         }
 
         .invoice-container {
@@ -212,7 +217,7 @@
                 <tr class="total-row">
                     <td colspan="4" style="border: none;"></td>
                     <td class="text-right" style="padding-top: 15px;">Net Paid:</td>
-                    <td class="text-right" style="padding-top: 15px;">₹{{ number_format($order->net_amount, 2) }}</td>
+                    <td class="text-right" style="padding-top: 15px;"><span class="rupee">&#8377;</span>{{ number_format($order->net_amount, 2) }}</td>
                 </tr>
             </tbody>
         </table>
@@ -238,9 +243,11 @@
     </div>
 
     <!-- Print triggers -->
+    @if(!isset($is_email_or_pdf) || !$is_email_or_pdf)
     <div class="no-print" style="margin-top: 20px; text-align: center;">
         <button onclick="window.print()" style="padding: 10px 20px; font-size: 14px; font-weight: bold; background: #000000; color: #ffffff; cursor: pointer; border: none;">PRINT INVOICE RECEIPT</button>
     </div>
+    @endif
 
 </body>
 </html>

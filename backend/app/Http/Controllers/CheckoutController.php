@@ -171,25 +171,17 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Send order invoice email to admin and customer in the background
+            // Send order invoice email to admin and customer synchronously
             try {
                 $orderId = $order->id;
                 $tenantDb = config('database.connections.' . config('database.default') . '.database');
                 
-                if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                    $phpExe  = str_replace('/', DIRECTORY_SEPARATOR, base_path('.tools/php/php.exe'));
-                    $phpIni  = str_replace('/', DIRECTORY_SEPARATOR, base_path('.tools/php/php.ini'));
-                    $artisan = str_replace('/', DIRECTORY_SEPARATOR, base_path('artisan'));
-                    $cmd = "\"{$phpExe}\" -c \"{$phpIni}\" \"{$artisan}\" order:send-email {$orderId} --tenant-db={$tenantDb}";
-                } else {
-                    $phpPath = PHP_BINARY;
-                    $artisanPath = base_path('artisan');
-                    $cmd = "{$phpPath} {$artisanPath} order:send-email {$orderId} --tenant-db={$tenantDb}";
-                }
-
-                \Illuminate\Support\Facades\Process::path(base_path())->start($cmd);
+                \Illuminate\Support\Facades\Artisan::call('order:send-email', [
+                    'orderId' => $orderId,
+                    '--tenant-db' => $tenantDb
+                ]);
             } catch (\Exception $e) {
-                Log::error('Failed to dispatch background email: ' . $e->getMessage());
+                Log::error('Failed to send order email: ' . $e->getMessage());
             }
 
             return response()->json([
