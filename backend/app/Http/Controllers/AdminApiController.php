@@ -519,6 +519,7 @@ class AdminApiController extends Controller
             'about_us_badge', 'about_us_title',
             'slider_image_1', 'slider_image_2', 'slider_image_3',
             'aboutus_image_1',
+            'store_logo', 'store_favicon',
             'license_name', 'license_no', 'store_map_iframe',
             'marquee_alert_1', 'marquee_alert_2', 'marquee_alert_3', 'marquee_alert_4', 'marquee_alert_5', 'marquee_alert_6',
         ];
