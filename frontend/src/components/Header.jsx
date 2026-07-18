@@ -5,18 +5,12 @@ import { useStore } from '../context/StoreContext';
 export default function Header() {
   const {
     settings,
-    categories,
-    searchQuery,
-    setSearchQuery,
-    activeCategory,
-    setActiveCategory,
     totalQty,
     totalNet,
     setCheckoutOpen,
   } = useStore();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [deptMenuOpen, setDeptMenuOpen] = useState(false);
   const location = useLocation();
 
   const alerts = [
@@ -37,24 +31,27 @@ export default function Header() {
 
   const isActive = (path) => location.pathname === path;
 
-  const handleCategorySelect = (slug) => {
-    setActiveCategory(slug);
-    setDeptMenuOpen(false);
-    
-    // Scroll to quick-order section
-    const el = document.getElementById('quick-order');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const formatCurrency = (val) => {
     return parseFloat(val || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
   };
 
+  const getGoogleMapsUrl = () => {
+    const addressQuery = encodeURIComponent(settings.store_address || 'Virudhunagar to Sivakasi Main Road, Sivakasi');
+    return `https://www.google.com/maps/search/?api=1&query=${addressQuery}`;
+  };
+
+  const navLinks = [
+    { to: '/', label: 'Home', icon: 'fa-house', isLink: true },
+    { to: '/#quick-order', label: 'Quick Order Sheet', icon: 'fa-list-check', isLink: false },
+    { to: '/price-list', label: 'Price List', icon: 'fa-tags', isLink: true },
+    { to: '/track', label: 'Track Order', icon: 'fa-truck-fast', isLink: true },
+    { to: '/about', label: 'About Us', icon: 'fa-circle-info', isLink: true },
+    { to: '/contact', label: 'Contact', icon: 'fa-envelope', isLink: true },
+  ];
+
   return (
     <>
-      {/* ROW 1: Top Utility Bar (Dark Slate / bg-crimson-600) */}
+      {/* ROW 1: Top Marquee & Admin Bar */}
       <div className="bg-crimson-600 text-slate-100 text-[10px] sm:text-xs py-2 font-bold shadow-sm select-none border-b border-crimson-700">
         <div className="container mx-auto px-4 flex justify-between items-center gap-4">
           <div className="flex-grow overflow-hidden relative">
@@ -79,70 +76,68 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ROW 2: Main Brand & Contact Bar (White) */}
-      <div className="bg-white border-b border-slate-200 py-4 select-none">
-        <div className="container mx-auto px-4 flex justify-between items-center gap-4">
-          {/* Logo / Branding */}
-          <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            {settings.store_logo ? (
-              <img
-                src={settings.store_logo.startsWith('data:') || settings.store_logo.startsWith('http') ? settings.store_logo : `/${settings.store_logo}`}
-                alt={settings.store_name}
-                className="h-10 md:h-12 w-auto object-contain rounded-xl shadow-sm"
-              />
-            ) : (
-              <div className="bg-gold-500 p-2 rounded-xl shadow-md group-hover:rotate-6 transition-transform duration-300">
-                <i className="fa-solid fa-fire text-lg md:text-2xl text-crimson-600"></i>
-              </div>
-            )}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-sm md:text-base lg:text-xl font-black tracking-tight text-slate-900 leading-none">
-                {settings.store_name?.toUpperCase() || 'CRACKER SHOPE'}
-              </h1>
-              <p className="text-[8px] md:text-[9px] text-slate-500 tracking-widest uppercase font-semibold leading-none mt-1">
-                Sivakasi Wholesale Dealers
-              </p>
+      {/* ROW 2: Light Festive Brand Bar — theme color background in light mode */}
+      <div className="relative bg-crimson-50 border-b border-crimson-100 py-5 select-none overflow-hidden">
+
+        {/* Left soft festive glow */}
+        <div className="absolute left-0 top-0 h-full w-48 pointer-events-none" style={{background: 'radial-gradient(ellipse at 10% 50%, rgba(220,38,38,0.08) 0%, rgba(234,179,8,0.05) 40%, transparent 70%)'}}></div>
+        <div className="absolute left-8 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full pointer-events-none opacity-20" style={{background: 'radial-gradient(circle, rgba(251,191,36,0.4) 0%, rgba(220,38,38,0.2) 50%, transparent 70%)', filter: 'blur(12px)'}}></div>
+
+        {/* Right soft festive glow */}
+        <div className="absolute right-0 top-0 h-full w-48 pointer-events-none" style={{background: 'radial-gradient(ellipse at 90% 50%, rgba(220,38,38,0.08) 0%, rgba(234,179,8,0.05) 40%, transparent 70%)'}}></div>
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 w-32 h-32 rounded-full pointer-events-none opacity-20" style={{background: 'radial-gradient(circle, rgba(251,191,36,0.4) 0%, rgba(220,38,38,0.2) 50%, transparent 70%)', filter: 'blur(12px)'}}></div>
+
+        <div className="container mx-auto px-4 relative z-10 flex items-center justify-between md:justify-center gap-6 md:gap-16 lg:gap-24">
+
+          {/* LEFT: Circular Logo */}
+          <Link to="/" className="group flex-shrink-0">
+            <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-gold-500 shadow-md shadow-gold-500/20 overflow-hidden bg-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:border-gold-400">
+              {settings.store_logo ? (
+                <img
+                  src={settings.store_logo.startsWith('data:') || settings.store_logo.startsWith('http') ? settings.store_logo : `/${settings.store_logo}`}
+                  alt={settings.store_name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <i className="fa-solid fa-fire text-3xl text-gold-500"></i>
+              )}
             </div>
           </Link>
 
-          {/* Navigation Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-6 text-xs lg:text-sm font-bold text-slate-700">
-            <Link to="/" className={`hover:text-gold-600 transition-colors flex items-center gap-1.5 ${isActive('/') ? 'text-gold-600 border-b-2 border-gold-500 pb-0.5' : ''}`}>
-              Home
-            </Link>
-            <a href="/#quick-order" className="hover:text-gold-600 transition-colors flex items-center gap-1.5">
-              Quick Order Sheet
-            </a>
-            <Link to="/price-list" className={`hover:text-gold-600 transition-colors flex items-center gap-1.5 ${isActive('/price-list') ? 'text-gold-600 border-b-2 border-gold-500 pb-0.5' : ''}`}>
-              Price List
-            </Link>
-            <Link to="/track" className={`hover:text-gold-600 transition-colors flex items-center gap-1.5 ${isActive('/track') ? 'text-gold-600 border-b-2 border-gold-500 pb-0.5' : ''}`}>
-              Track Order
-            </Link>
-            <Link to="/about" className={`hover:text-gold-600 transition-colors flex items-center gap-1.5 ${isActive('/about') ? 'text-gold-600 border-b-2 border-gold-500 pb-0.5' : ''}`}>
-              About Us
-            </Link>
-            <Link to="/contact" className={`hover:text-gold-600 transition-colors flex items-center gap-1.5 ${isActive('/contact') ? 'text-gold-600 border-b-2 border-gold-500 pb-0.5' : ''}`}>
-              Contact
-            </Link>
-          </nav>
+          {/* CENTER: Address */}
+          <a
+            href={getGoogleMapsUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 md:flex-none flex flex-col items-center justify-center text-center gap-1 group/address hover:scale-105 transition-transform duration-200"
+          >
+            <h3 className="text-crimson-700 font-extrabold text-sm uppercase tracking-widest group-hover/address:text-crimson-600 transition-colors">Address</h3>
+            <p className="text-slate-800 text-xs md:text-sm font-bold leading-relaxed max-w-sm">
+              {settings.store_address || 'Virudhunagar to Sivakasi Main Road, Sivakasi'}
+            </p>
+            <span className="text-[10px] md:text-xs font-black text-gold-600 group-hover/address:text-gold-500 flex items-center gap-1 mt-0.5 underline decoration-dotted transition-colors">
+              <i className="fa-solid fa-location-dot animate-bounce text-[10px]"></i> Shop Location
+            </span>
+          </a>
 
-          {/* Contact details */}
-          <div className="hidden lg:flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gold-50 flex items-center justify-center border border-gold-100 flex-shrink-0">
-              <i className="fa-solid fa-headset text-gold-600 text-sm"></i>
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase leading-none">Support Hotline</span>
-              <a href={`tel:${settings.store_phone}`} className="text-xs md:text-sm font-black text-slate-800 hover:text-gold-600 transition-colors leading-normal mt-0.5">{settings.store_phone}</a>
-            </div>
+          {/* RIGHT: Mobile Number */}
+          <div className="hidden md:flex flex-col items-center text-center gap-1 flex-shrink-0">
+            <h3 className="text-crimson-700 font-extrabold text-sm uppercase tracking-widest">Mobile Number</h3>
+            <a href={`tel:${settings.store_phone}`} className="text-slate-900 text-xs md:text-sm font-black hover:text-crimson-700 transition-colors">
+              {settings.store_phone}
+            </a>
+            {settings.store_email && (
+              <a href={`mailto:${settings.store_email}`} className="text-slate-655 text-[11px] font-bold hover:text-crimson-700 transition-colors">
+                {settings.store_email}
+              </a>
+            )}
           </div>
 
-          {/* Mobile Menu Toggler + Cart Icon */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* Mobile: Hamburger & Cart */}
+          <div className="flex md:hidden items-center gap-2 flex-shrink-0">
             <button
               onClick={() => setCheckoutOpen(true)}
-              className="relative w-9 h-9 border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors"
+              className="relative w-9 h-9 border border-crimson-200 rounded-xl bg-white flex items-center justify-center text-slate-700 hover:bg-crimson-100 transition-colors"
               title="Cart"
             >
               <i className="fa-solid fa-bag-shopping text-sm"></i>
@@ -154,115 +149,69 @@ export default function Header() {
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-9 h-9 border border-slate-200 rounded-xl flex items-center justify-center text-slate-655 hover:bg-slate-50 transition-colors"
+              className="w-9 h-9 border border-crimson-200 rounded-xl bg-white flex items-center justify-center text-slate-700 hover:bg-crimson-100 transition-colors"
             >
               <i className={mobileMenuOpen ? 'fa-solid fa-xmark text-sm' : 'fa-solid fa-bars text-sm'}></i>
             </button>
           </div>
+
         </div>
       </div>
 
-      {/* ROW 3: Yellow Action Bar (Only visible on Home page) */}
-      {location.pathname === '/' && (
-        <div className="bg-gold-500 py-3 shadow sticky top-0 z-40 select-none">
-          <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
-            
-            {/* Left: Department Menu */}
-            <div className="relative w-full md:w-auto">
-              <button
-                onClick={() => setDeptMenuOpen(!deptMenuOpen)}
-                className="w-full md:w-56 bg-crimson-600 hover:bg-crimson-700 text-white font-extrabold text-xs uppercase tracking-wider py-2.5 px-4 rounded-xl flex items-center justify-between gap-1.5 transition-all shadow-sm shadow-crimson-750/10"
-              >
-                <div className="flex items-center gap-1.5">
-                  <i className="fa-solid fa-bars-staggered text-sm"></i>
-                  <span>Shop by Category</span>
-                </div>
-                <i className={`fa-solid fa-chevron-down text-[10px] transition-transform duration-200 ${deptMenuOpen ? 'rotate-180' : ''}`}></i>
-              </button>
-              
-              {/* Category Dropdown List */}
-              {deptMenuOpen && (
-                <div className="absolute left-0 mt-2 w-full md:w-56 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <button
-                    onClick={() => handleCategorySelect('all')}
-                    className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${activeCategory === 'all' ? 'bg-gold-50 text-gold-700' : 'text-slate-700 hover:bg-slate-50'}`}
-                  >
-                    <i className="fa-solid fa-boxes-stacked mr-2 opacity-60"></i> All Products
-                  </button>
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => handleCategorySelect(cat.slug)}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${activeCategory === cat.slug ? 'bg-gold-50 text-gold-700' : 'text-slate-700 hover:bg-slate-50'}`}
-                    >
-                      <i className="fa-solid fa-fire-flame-curved mr-2 text-crimson-500 opacity-60"></i> {cat.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+      {/* ROW 3: Main Navigation Bar — styled like reference screenshot, synced to crimson/gold theme */}
+      <div className="hidden md:block bg-crimson-600 select-none shadow-md">
+        <div className="flex items-center justify-center">
 
-            {/* Center: Search Bar */}
-            <div className="relative w-full md:max-w-xl flex items-center">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-455">
-                <i className="fa-solid fa-magnifying-glass text-xs"></i>
-              </span>
-              <input
-                type="text"
-                placeholder="Search wholesale firecrackers by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border-0 focus:ring-2 focus:ring-crimson-600 rounded-xl py-2.5 pl-10 pr-24 text-xs text-slate-700 placeholder-slate-400 focus:outline-none transition-all shadow-inner font-semibold"
-              />
-              <button className="absolute right-1 bg-crimson-600 hover:bg-crimson-700 text-white font-extrabold text-[10px] uppercase tracking-wider py-1.5 px-4 rounded-lg shadow transition-colors">
-                Search
-              </button>
-            </div>
+          {navLinks.map((link, idx) => {
+            const active = link.isLink && isActive(link.to);
+            const linkClass = `flex items-center gap-2 px-5 py-3.5 text-[11px] font-extrabold uppercase tracking-widest whitespace-nowrap transition-all duration-150 border-r border-crimson-500
+              ${active
+                ? 'bg-gold-500 text-crimson-800 shadow-inner'
+                : 'text-white hover:bg-crimson-700 hover:text-gold-300'}`;
 
-            {/* Right: Cart Tally Widget */}
-            <button
-              onClick={() => setCheckoutOpen(true)}
-              className="hidden md:flex items-center gap-3.5 bg-crimson-600 hover:bg-crimson-700 text-white py-1.5 px-4 rounded-xl shadow-inner transition-colors flex-shrink-0"
-            >
-              <div className="relative">
-                <i className="fa-solid fa-bag-shopping text-sm text-gold-500"></i>
-                {totalQty > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-yellow-500 text-slate-900 text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-crimson-600 shadow-sm animate-bounce">
-                    {totalQty}
-                  </span>
-                )}
-              </div>
-              <div className="flex flex-col text-right font-extrabold text-xs">
-                <span className="text-[8px] text-slate-350 uppercase leading-none font-semibold">Total Net</span>
-                <span className="text-white mt-0.5 leading-none">₹{formatCurrency(totalNet)}</span>
-              </div>
-            </button>
+            return link.isLink ? (
+              <Link key={link.to} to={link.to} className={linkClass}>
+                <i className={`fa-solid ${link.icon} text-[10px]`}></i>
+                <span>{link.label}</span>
+              </Link>
+            ) : (
+              <a key={link.to} href={link.to} className={linkClass}>
+                <i className={`fa-solid ${link.icon} text-[10px]`}></i>
+                <span>{link.label}</span>
+              </a>
+            );
+          })}
 
-          </div>
         </div>
-      )}
+      </div>
 
       {/* Mobile Navigation Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-2.5 shadow-md">
-          <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
-            Home
-          </Link>
-          <a href="/#quick-order" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
-            Quick Order Sheet
-          </a>
-          <Link to="/price-list" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
-            Price List
-          </Link>
-          <Link to="/track" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
-            Track Order
-          </Link>
-          <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
-            About Us
-          </Link>
-          <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
-            Contact
-          </Link>
+        <div className="md:hidden bg-white border-b border-slate-200 shadow-md select-none">
+          {navLinks.map((link) => (
+            link.isLink ? (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`flex items-center gap-3 px-5 py-3 text-xs font-bold border-b border-slate-100 transition-colors
+                  ${isActive(link.to) ? 'bg-gold-50 text-crimson-600 border-l-4 border-l-gold-500' : 'text-slate-700 hover:bg-slate-50'}`}
+              >
+                <i className={`fa-solid ${link.icon} text-crimson-500 text-sm w-4`}></i>
+                <span className="uppercase tracking-wide">{link.label}</span>
+              </Link>
+            ) : (
+              <a
+                key={link.to}
+                href={link.to}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-xs font-bold border-b border-slate-100 text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <i className={`fa-solid ${link.icon} text-crimson-500 text-sm w-4`}></i>
+                <span className="uppercase tracking-wide">{link.label}</span>
+              </a>
+            )
+          ))}
         </div>
       )}
     </>
