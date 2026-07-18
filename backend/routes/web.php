@@ -67,7 +67,15 @@ Route::prefix('api')->group(function () {
             $logFile = storage_path('logs/email_background.log');
             $laravelLog = storage_path('logs/laravel.log');
             
-            $output = "=== EMAIL BACKGROUND LOG (storage/logs/email_background.log) ===\n";
+            $output = "=== ACTIVE MAIL CONFIG ===\n";
+            $output .= "Default: " . config('mail.default') . "\n";
+            $output .= "Host: " . config('mail.mailers.smtp.host') . "\n";
+            $output .= "Port: " . config('mail.mailers.smtp.port') . "\n";
+            $output .= "Encryption: " . config('mail.mailers.smtp.encryption') . "\n";
+            $output .= "Username: " . config('mail.mailers.smtp.username') . "\n";
+            $output .= "From Address: " . config('mail.from.address') . "\n\n";
+            
+            $output = $output . "=== EMAIL BACKGROUND LOG (storage/logs/email_background.log) ===\n";
             if (file_exists($logFile)) {
                 $output .= file_get_contents($logFile) . "\n";
             } else {
