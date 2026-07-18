@@ -36,6 +36,20 @@ export default function Header() {
   };
 
   const getGoogleMapsUrl = () => {
+    if (settings.store_map_iframe) {
+      // 1. If user input contains an iframe, extract the src URL
+      const match = settings.store_map_iframe.match(/src=["']([^"']+)["']/);
+      if (match && match[1]) {
+        return match[1];
+      }
+      
+      // 2. If it's a raw URL link starting with http
+      if (settings.store_map_iframe.trim().startsWith('http')) {
+        return settings.store_map_iframe.trim();
+      }
+    }
+    
+    // Fallback: standard Google Maps search using the store address
     const addressQuery = encodeURIComponent(settings.store_address || 'Virudhunagar to Sivakasi Main Road, Sivakasi');
     return `https://www.google.com/maps/search/?api=1&query=${addressQuery}`;
   };
