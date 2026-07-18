@@ -62,6 +62,32 @@ Route::prefix('api')->group(function () {
         }
     });
     Route::get('/checkout/invoice/{order_number}', [CheckoutController::class, 'downloadInvoice'])->name('checkout.invoice');
+    Route::get('/view-logs', function () {
+        try {
+            $logFile = storage_path('logs/email_background.log');
+            $laravelLog = storage_path('logs/laravel.log');
+            
+            $output = "=== EMAIL BACKGROUND LOG (storage/logs/email_background.log) ===\n";
+            if (file_exists($logFile)) {
+                $output .= file_get_contents($logFile) . "\n";
+            } else {
+                $output .= "File does not exist.\n";
+            }
+            
+            $output .= "\n=== LARAVEL LOG LAST 50 LINES (storage/logs/laravel.log) ===\n";
+            if (file_exists($laravelLog)) {
+                $lines = file($laravelLog);
+                $lastLines = array_slice($lines, -50);
+                $output .= implode("", $lastLines) . "\n";
+            } else {
+                $output .= "File does not exist.\n";
+            }
+            
+            return response($output)->header('Content-Type', 'text/plain');
+        } catch (\Exception $e) {
+            return response("Error reading logs: " . $e->getMessage(), 500)->header('Content-Type', 'text/plain');
+        }
+    });
 });
 
 // 2. Public Storefront & Booking Routes (handled by React Client-side routing)

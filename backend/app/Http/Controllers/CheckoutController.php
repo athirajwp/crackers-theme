@@ -188,7 +188,7 @@ class CheckoutController extends Controller
                     pclose(popen($cmd, 'r'));
                 } else {
                     $logPath = storage_path('logs/email_background.log');
-                    $cmd = escapeshellarg($phpPath) . ' ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb) . ' > ' . escapeshellarg($logPath) . ' 2>&1 &';
+                    $cmd = 'nohup ' . escapeshellarg($phpPath) . ' ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb) . ' > ' . escapeshellarg($logPath) . ' 2>&1 &';
                     exec($cmd);
                 }
             } catch (\Exception $e) {
