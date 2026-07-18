@@ -274,4 +274,19 @@ class CheckoutController extends Controller
 
         return view('checkout_success', compact('order', 'qrCodeUrl', 'bankDetails', 'whatsappUrl', 'whatsappNum', 'customerWhatsappUrl'));
     }
+
+    /**
+     * Download or stream the formal PDF invoice.
+     */
+    public function downloadInvoice($orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)->with('items')->firstOrFail();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.invoice', [
+            'order' => $order,
+            'is_email_or_pdf' => true,
+        ]);
+
+        return $pdf->stream('invoice-' . $order->order_number . '.pdf');
+    }
 }

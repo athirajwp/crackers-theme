@@ -74,7 +74,7 @@ export default function CheckoutSuccess() {
               </span>
             </div>
             <button
-              onClick={() => window.print()}
+              onClick={() => window.open(`/api/checkout/invoice/${order.order_number}`, '_blank')}
               className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
             >
               <i className="fa-solid fa-print text-crimson-600"></i> Print Invoice

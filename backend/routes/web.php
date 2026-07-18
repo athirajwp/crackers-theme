@@ -61,6 +61,7 @@ Route::prefix('api')->group(function () {
             return response("ERROR ENCOUNTERED:\n" . $e->getMessage() . "\n\nTrace:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
         }
     });
+    Route::get('/checkout/invoice/{order_number}', [CheckoutController::class, 'downloadInvoice'])->name('checkout.invoice');
 });
 
 // 2. Public Storefront & Booking Routes (handled by React Client-side routing)
