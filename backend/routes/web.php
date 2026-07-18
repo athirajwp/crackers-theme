@@ -27,6 +27,40 @@ Route::prefix('api')->group(function () {
     Route::get('/track', [StorefrontApiController::class, 'track']);
     Route::get('/checkout/success/{order_number}', [StorefrontApiController::class, 'successDetails']);
     Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::get('/test-email', function (\Illuminate\Http\Request $request) {
+        try {
+            $orderId = $request->query('order_id');
+            $order = $orderId ? \App\Models\Order::find($orderId) : \App\Models\Order::orderBy('id', 'desc')->first();
+            if (!$order) {
+                return response("No orders found to test with.", 404)->header('Content-Type', 'text/plain');
+            }
+            
+            $adminEmail = \App\Models\Setting::get('store_email', config('mail.from.address'));
+            $output = "Starting email test for order ID {$order->id} (Number: {$order->order_number})...\n";
+            $output .= "SMTP Host: " . config('mail.mailers.smtp.host') . "\n";
+            $output .= "SMTP Port: " . config('mail.mailers.smtp.port') . "\n";
+            $output .= "SMTP Username: " . config('mail.mailers.smtp.username') . "\n";
+            $output .= "Admin Email: {$adminEmail}\n";
+            
+            if (!empty($adminEmail)) {
+                $output .= "Sending Admin Invoice Mail...\n";
+                \Illuminate\Support\Facades\Mail::to($adminEmail)->send(new \App\Mail\AdminInvoiceMail($order));
+                $output .= "SUCCESS: Admin email sent!\n";
+            }
+            
+            if (!empty($order->email)) {
+                $output .= "Sending Customer Order Mail to {$order->email}...\n";
+                \Illuminate\Support\Facades\Mail::to($order->email)->send(new \App\Mail\CustomerOrderMail($order));
+                $output .= "SUCCESS: Customer email sent!\n";
+            } else {
+                $output .= "Skipped Customer Mail (No email provided for this order).\n";
+            }
+            
+            return response($output)->header('Content-Type', 'text/plain');
+        } catch (\Exception $e) {
+            return response("ERROR ENCOUNTERED:\n" . $e->getMessage() . "\n\nTrace:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
+        }
+    });
 });
 
 // 2. Public Storefront & Booking Routes (handled by React Client-side routing)
