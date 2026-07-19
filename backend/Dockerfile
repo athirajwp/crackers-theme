@@ -18,6 +18,11 @@ WORKDIR /var/www
 # Copy the backend code
 COPY . .
 
+# Configure custom php.ini settings for file uploads
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && sed -i 's/upload_max_filesize = 2M/upload_max_filesize = 50M/g' "$PHP_INI_DIR/php.ini" \
+    && sed -i 's/post_max_size = 8M/post_max_size = 50M/g' "$PHP_INI_DIR/php.ini"
+
 # Install PHP packages (skipping scripts and ignoring platform requirements to avoid build errors)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts --ignore-platform-reqs
 
@@ -33,4 +38,5 @@ RUN mkdir -p /var/www/storage/framework/cache/data \
 # Expose port and start Laravel
 EXPOSE 8000
 
-CMD php artisan package:discover --ansi && php artisan serve --host=0.0.0.0 --port=$PORT
+CMD php artisan storage:link --force && php artisan package:discover --ansi && php artisan serve --host=0.0.0.0 --port=$PORT
+
