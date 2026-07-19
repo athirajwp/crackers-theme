@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Ensure APP_KEY has a fallback if not defined in the environment (e.g. Render Free Tier)
+        if (empty(config('app.key')) || config('app.key') === 'SomeRandomString' || config('app.key') === 'null') {
+            config(['app.key' => 'base64:mmOr9QdwTgiYlUU7ku/etwsCl5ryOSa25AfLUEeHo6g=']);
+        }
+
         // 1. Clone the default connection config to 'central'
         try {
             $defaultConn = config('database.default');
