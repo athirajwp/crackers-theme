@@ -24,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
             config(['app.key' => 'base64:mmOr9QdwTgiYlUU7ku/etwsCl5ryOSa25AfLUEeHo6g=']);
         }
 
+        // Ensure session.driver falls back to 'file' to avoid missing database tables in default configurations
+        if (empty(config('session.driver')) || config('session.driver') === 'database') {
+            config(['session.driver' => 'file']);
+        }
+
         // 1. Clone the default connection config to 'central'
         try {
             $defaultConn = config('database.default');
