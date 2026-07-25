@@ -262,6 +262,263 @@ class AdminApiController extends Controller
     }
 
     /**
+     * Import products from an Excel file (.xlsx, .xls, .csv).
+     * Expected columns: Category, Product Name, Pack Size, MRP, Selling Price, Sort Order, Status
+     */
+    public function importProducts(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getRealPath());
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray(null, true, true, true);
+
+            if (count($rows) < 2) {
+                return response()->json(['error' => 'The file appears to be empty or has no data rows.'], 422);
+            }
+
+            // Parse header row (first row)
+            $headerRow = array_shift($rows);
+            $headerMap = [];
+            foreach ($headerRow as $col => $value) {
+                if ($value !== null) {
+                    $headerMap[strtolower(trim($value))] = $col;
+                }
+            }
+
+            // Validate required columns
+            $requiredColumns = ['category', 'product name', 'pack size', 'mrp', 'selling price'];
+            $missingColumns = [];
+            foreach ($requiredColumns as $col) {
+                if (!isset($headerMap[$col])) {
+                    $missingColumns[] = ucwords($col);
+                }
+            }
+
+            if (!empty($missingColumns)) {
+                return response()->json([
+                    'error' => 'Missing required columns: ' . implode(', ', $missingColumns) . '. Required columns are: Category, Product Name, Pack Size, MRP, Selling Price.'
+                ], 422);
+            }
+
+            // Pre-load existing categories (case-insensitive lookup)
+            $categoryCache = [];
+            foreach (Category::all() as $cat) {
+                $categoryCache[strtolower(trim($cat->name))] = $cat;
+            }
+
+            $imported = 0;
+            $updated = 0;
+            $skipped = 0;
+            $errors = [];
+
+            foreach ($rows as $rowIndex => $row) {
+                $rowNum = $rowIndex + 1; // 1-based for user-friendly error messages (header was row 1)
+
+                $categoryName = trim($row[$headerMap['category']] ?? '');
+                $productName = trim($row[$headerMap['product name']] ?? '');
+                $packSize = trim($row[$headerMap['pack size']] ?? '');
+                $mrp = $row[$headerMap['mrp']] ?? 0;
+                $sellingPrice = $row[$headerMap['selling price']] ?? 0;
+                $sortOrder = isset($headerMap['sort order']) ? ($row[$headerMap['sort order']] ?? 0) : 0;
+                $status = isset($headerMap['status']) ? strtolower(trim($row[$headerMap['status']] ?? 'active')) : 'active';
+
+                // Skip completely empty rows
+                if (empty($categoryName) && empty($productName)) {
+                    continue;
+                }
+
+                // Validate row data
+                if (empty($categoryName)) {
+                    $errors[] = "Row {$rowNum}: Category is empty, skipped.";
+                    $skipped++;
+                    continue;
+                }
+                if (empty($productName)) {
+                    $errors[] = "Row {$rowNum}: Product Name is empty, skipped.";
+                    $skipped++;
+                    continue;
+                }
+                if (!is_numeric($mrp) || $mrp < 0) {
+                    $errors[] = "Row {$rowNum}: Invalid MRP value '{$mrp}', skipped.";
+                    $skipped++;
+                    continue;
+                }
+                if (!is_numeric($sellingPrice) || $sellingPrice < 0) {
+                    $errors[] = "Row {$rowNum}: Invalid Selling Price value '{$sellingPrice}', skipped.";
+                    $skipped++;
+                    continue;
+                }
+
+                // Normalize status
+                if (!in_array($status, ['active', 'inactive'])) {
+                    $status = 'active';
+                }
+
+                // Find or create category
+                $catKey = strtolower($categoryName);
+                if (!isset($categoryCache[$catKey])) {
+                    $newCat = Category::create([
+                        'name' => $categoryName,
+                        'slug' => \Illuminate\Support\Str::slug($categoryName),
+                        'sort_order' => 0,
+                        'status' => 'active',
+                    ]);
+                    $categoryCache[$catKey] = $newCat;
+                }
+                $category = $categoryCache[$catKey];
+
+                // Check if product already exists in same category with same name
+                $existingProduct = Product::where('name', $productName)
+                    ->where('category_id', $category->id)
+                    ->first();
+
+                if ($existingProduct) {
+                    $existingProduct->update([
+                        'pack_size' => $packSize ?: $existingProduct->pack_size,
+                        'mrp' => (float) $mrp,
+                        'selling_price' => (float) $sellingPrice,
+                        'sort_order' => (int) $sortOrder,
+                        'status' => $status,
+                    ]);
+                    $updated++;
+                } else {
+                    Product::create([
+                        'category_id' => $category->id,
+                        'name' => $productName,
+                        'pack_size' => $packSize ?: '-',
+                        'mrp' => (float) $mrp,
+                        'selling_price' => (float) $sellingPrice,
+                        'sort_order' => (int) $sortOrder,
+                        'status' => $status,
+                    ]);
+                    $imported++;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'imported' => $imported,
+                'updated' => $updated,
+                'skipped' => $skipped,
+                'errors' => $errors,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Product Import Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to process file: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Export current products as an Excel file (also serves as a template).
+     */
+    public function exportProductTemplate(Request $request)
+    {
+        try {
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Products');
+
+            // Set headers
+            $headers = ['Category', 'Product Name', 'Pack Size', 'MRP', 'Selling Price', 'Sort Order', 'Status'];
+            foreach ($headers as $colIndex => $header) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+                $sheet->setCellValue($colLetter . '1', $header);
+
+                // Style the header row
+                $sheet->getStyle($colLetter . '1')->getFont()->setBold(true);
+                $sheet->getStyle($colLetter . '1')->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFE8532A');
+                $sheet->getStyle($colLetter . '1')->getFont()->getColor()->setARGB('FFFFFFFF');
+                $sheet->getColumnDimension($colLetter)->setAutoSize(true);
+            }
+
+            $includeData = $request->query('include_data', 'false') === 'true';
+
+            if ($includeData) {
+                // Export existing products
+                $products = Product::with('category')
+                    ->join('categories', 'products.category_id', '=', 'categories.id')
+                    ->orderBy('categories.sort_order', 'asc')
+                    ->orderBy('products.name', 'asc')
+                    ->select('products.*')
+                    ->get();
+
+                $row = 2;
+                foreach ($products as $product) {
+                    $sheet->setCellValue('A' . $row, $product->category->name ?? 'Uncategorized');
+                    $sheet->setCellValue('B' . $row, $product->name);
+                    $sheet->setCellValue('C' . $row, $product->pack_size);
+                    $sheet->setCellValue('D' . $row, (float) $product->mrp);
+                    $sheet->setCellValue('E' . $row, (float) $product->selling_price);
+                    $sheet->setCellValue('F' . $row, (int) $product->sort_order);
+                    $sheet->setCellValue('G' . $row, $product->status);
+                    $row++;
+                }
+            } else {
+                // Add sample rows for template
+                $sampleData = [
+                    ['Ground Chakkars', 'Big Ground Chakkars', '1 Box (10 Pcs)', 500, 200, 1, 'active'],
+                    ['Sparklers', '10cm Green Sparklers', '1 Box (10 Pcs)', 100, 40, 1, 'active'],
+                ];
+                $row = 2;
+                foreach ($sampleData as $sample) {
+                    foreach ($sample as $colIndex => $value) {
+                        $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+                        $sheet->setCellValue($colLetter . $row, $value);
+                    }
+                    $row++;
+                }
+            }
+
+            // Add a Categories reference sheet
+            $catSheet = $spreadsheet->createSheet();
+            $catSheet->setTitle('Categories (Reference)');
+            $catSheet->setCellValue('A1', 'Existing Categories');
+            $catSheet->getStyle('A1')->getFont()->setBold(true);
+            $catSheet->getStyle('A1')->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FF4CAF50');
+            $catSheet->getStyle('A1')->getFont()->getColor()->setARGB('FFFFFFFF');
+            $catSheet->getColumnDimension('A')->setAutoSize(true);
+
+            $categories = Category::orderBy('sort_order', 'asc')->get();
+            $catRow = 2;
+            foreach ($categories as $cat) {
+                $catSheet->setCellValue('A' . $catRow, $cat->name);
+                $catRow++;
+            }
+
+            $catSheet->setCellValue('B1', 'Note');
+            $catSheet->setCellValue('B2', 'Use these exact category names in the Products sheet.');
+            $catSheet->setCellValue('B3', 'New category names will be auto-created during import.');
+            $catSheet->getColumnDimension('B')->setAutoSize(true);
+            $catSheet->getStyle('B1')->getFont()->setBold(true);
+
+            // Set the active sheet back to Products
+            $spreadsheet->setActiveSheetIndex(0);
+
+            $fileName = $includeData ? 'products_export.xlsx' : 'products_template.xlsx';
+
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $tempFile = tempnam(sys_get_temp_dir(), 'products_') . '.xlsx';
+            $writer->save($tempFile);
+
+            return response()->download($tempFile, $fileName, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ])->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            Log::error('Product Export Error: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to generate file: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Orders API list & CRUD.
      */
     public function orders(Request $request)
