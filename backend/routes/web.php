@@ -148,23 +148,25 @@ Route::get('/admin/{any?}', function () {
     return view('react');
 })->where('any', '.*');
 
-// 4. Super Admin Multi-Domain Panel Routing Group
-Route::prefix('admin_sys')->name('admin_sys.')->group(function () {
-    // Auth routes
-    Route::get('/login', [\App\Http\Controllers\AdminSys\AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [\App\Http\Controllers\AdminSys\AuthController::class, 'login'])->name('login.post');
-    Route::post('/logout', [\App\Http\Controllers\AdminSys\AuthController::class, 'logout'])->name('logout');
+// 4. Super Admin API Routes & React Fallback
+Route::prefix('api/admin_sys')->group(function () {
+    Route::post('/auth/login', [\App\Http\Controllers\AdminSysApiController::class, 'login']);
+    Route::post('/auth/logout', [\App\Http\Controllers\AdminSysApiController::class, 'logout']);
+    Route::get('/auth/check', [\App\Http\Controllers\AdminSysApiController::class, 'checkAuth']);
 
-    // Protected routes
-    Route::middleware(['super_admin.auth'])->group(function () {
-        Route::get('/company', [\App\Http\Controllers\AdminSys\CompanyController::class, 'index'])->name('company.index');
-        Route::post('/company', [\App\Http\Controllers\AdminSys\CompanyController::class, 'store'])->name('company.store');
-        Route::post('/company/{id}/update', [\App\Http\Controllers\AdminSys\CompanyController::class, 'update'])->name('company.update');
-        Route::post('/company/{id}/toggle-status', [\App\Http\Controllers\AdminSys\CompanyController::class, 'toggleStatus'])->name('company.toggle_status');
-        Route::delete('/company/{id}', [\App\Http\Controllers\AdminSys\CompanyController::class, 'destroy'])->name('company.destroy');
+    Route::middleware([\App\Http\Middleware\SuperAdminAuth::class])->group(function () {
+        Route::get('/companies', [\App\Http\Controllers\AdminSysApiController::class, 'companies']);
+        Route::post('/companies/store', [\App\Http\Controllers\AdminSysApiController::class, 'storeCompany']);
+        Route::post('/companies/{id}/update', [\App\Http\Controllers\AdminSysApiController::class, 'updateCompany']);
+        Route::post('/companies/{id}/toggle-status', [\App\Http\Controllers\AdminSysApiController::class, 'toggleCompanyStatus']);
+        Route::delete('/companies/{id}/destroy', [\App\Http\Controllers\AdminSysApiController::class, 'destroyCompany']);
 
-        // Super Admin Profile Management
-        Route::get('/profile', [\App\Http\Controllers\AdminSys\ProfileController::class, 'edit'])->name('profile');
-        Route::post('/profile', [\App\Http\Controllers\AdminSys\ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/profile', [\App\Http\Controllers\AdminSysApiController::class, 'profile']);
+        Route::post('/profile/update', [\App\Http\Controllers\AdminSysApiController::class, 'updateProfile']);
     });
 });
+
+// React routing fallback for Super Admin panel UI
+Route::get('/admin_sys/{any?}', function () {
+    return view('react');
+})->where('any', '.*');

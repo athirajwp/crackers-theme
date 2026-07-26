@@ -16,6 +16,12 @@ class SuperAdminAuth
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->session()->has('super_admin_logged_in')) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Super Admin session expired. Please login again.'
+                ], 401);
+            }
             return redirect()->route('admin_sys.login');
         }
 

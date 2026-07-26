@@ -25,6 +25,12 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminBranding from './pages/admin/AdminBranding';
 import AdminProfile from './pages/admin/AdminProfile';
 
+// Super Admin (admin_sys) React imports
+import AdminSysLayout from './pages/admin_sys/AdminSysLayout';
+import AdminSysLogin from './pages/admin_sys/AdminSysLogin';
+import AdminSysCompany from './pages/admin_sys/AdminSysCompany';
+import AdminSysProfile from './pages/admin_sys/AdminSysProfile';
+
 function PublicLayout() {
   const { loading, settings, checkoutOpen, totalQty } = useStore();
   const [companyName, setCompanyName] = useState('Sivakasi Fireworks');
@@ -241,6 +247,14 @@ function App() {
           <Route path="/admin/settings" element={<AdminSettings />} />
           <Route path="/admin/branding" element={<AdminBranding />} />
           <Route path="/admin/profile" element={<AdminProfile />} />
+
+          {/* Super Admin Console Pages (admin_sys in React) */}
+          <Route path="/admin_sys/login" element={<AdminSysLogin />} />
+          <Route path="/admin_sys" element={<AdminSysLayout />}>
+            <Route index element={<AdminSysCompany />} />
+            <Route path="company" element={<AdminSysCompany />} />
+            <Route path="profile" element={<AdminSysProfile />} />
+          </Route>
         </Routes>
       </Router>
     </StoreProvider>

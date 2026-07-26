@@ -14,7 +14,7 @@ class TenantMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         // Skip switching for the super admin system panel
-        if ($request->is('admin_sys*')) {
+        if ($request->is('admin_sys*') || $request->is('api/admin_sys*')) {
             return $next($request);
         }
 

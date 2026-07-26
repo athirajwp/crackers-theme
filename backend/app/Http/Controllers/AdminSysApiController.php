@@ -1,0 +1,375 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Company;
+use App\Models\Setting;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+
+class AdminSysApiController extends Controller
+{
+    /**
+     * Check super admin authentication status.
+     */
+    public function checkAuth(Request $request)
+    {
+        $authenticated = session()->has('super_admin_logged_in') && session('super_admin_logged_in') === true;
+        return response()->json([
+            'authenticated' => $authenticated,
+            'username' => Setting::get('super_admin_username', env('SUPER_ADMIN_USERNAME', 'superadmin')),
+        ]);
+    }
+
+    /**
+     * Handle super admin login authentication.
+     */
+    public function login(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $expectedUser = Setting::get('super_admin_username');
+        if (!$expectedUser) {
+            $expectedUser = env('SUPER_ADMIN_USERNAME', 'superadmin');
+        }
+
+        $expectedPass = Setting::get('super_admin_password');
+        if (!$expectedPass) {
+            $expectedPass = env('SUPER_ADMIN_PASSWORD', 'superadmin123');
+        }
+
+        $isPasswordMatch = false;
+        if (str_starts_with($expectedPass, '$2y$') || str_starts_with($expectedPass, '$2a$')) {
+            $isPasswordMatch = Hash::check($request->password, $expectedPass);
+        } else {
+            $isPasswordMatch = ($request->password === $expectedPass);
+        }
+
+        if ($request->username === $expectedUser && $isPasswordMatch) {
+            session(['super_admin_logged_in' => true]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Super Admin authentication successful!',
+                'redirect' => '/admin_sys/company'
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid username or password!'
+        ], 422);
+    }
+
+    /**
+     * Log out super admin.
+     */
+    public function logout(Request $request)
+    {
+        session()->forget('super_admin_logged_in');
+        return response()->json([
+            'success' => true,
+            'message' => 'Super Admin logged out successfully.'
+        ]);
+    }
+
+    /**
+     * Fetch list of companies for super admin dashboard.
+     */
+    public function companies()
+    {
+        $this->ensureCompanyTableExists();
+
+        $companies = Company::orderBy('id', 'asc')->get();
+        return response()->json([
+            'success' => true,
+            'companies' => $companies
+        ]);
+    }
+
+    /**
+     * Store a newly created company domain and create tenant database.
+     */
+    public function storeCompany(Request $request)
+    {
+        Log::info('SuperAdmin API Company store request received:', $request->all());
+
+        $request->validate([
+            'code' => 'required|string|max:255|unique:companies,code',
+            'name' => 'required|string|max:255',
+            'website' => 'required|string|max:255',
+            'contact_1' => 'required|string|max:255',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $data = $request->all();
+
+        // Automatically assign port if website is localhost / 127.0.0.1
+        $websiteClean = strtolower(trim($data['website']));
+        if ($websiteClean === 'localhost' || $websiteClean === '127.0.0.1' || str_starts_with($websiteClean, 'localhost:') || str_starts_with($websiteClean, '127.0.0.1:')) {
+            $hostOnly = explode(':', $websiteClean)[0];
+            $nextPort = 7001 + Company::count();
+            $data['website'] = $hostOnly . ':' . $nextPort;
+        }
+
+        // Handle dynamic file uploads
+        $companyCode = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $request->code));
+        $files = ['bank_qr_1', 'bank_qr_2', 'bank_qr_3', 'logo_path', 'favicon_path'];
+        foreach ($files as $file) {
+            if ($request->hasFile($file)) {
+                $request->validate([
+                    $file => 'image|mimes:jpeg,png,jpg,webp,gif|max:3072'
+                ]);
+                
+                $fileName = time() . '_' . $file . '_' . uniqid() . '.' . $request->file($file)->extension();
+                $request->file($file)->move(public_path("uploads/companies/{$companyCode}/profile"), $fileName);
+                $data[$file] = "uploads/companies/{$companyCode}/profile/" . $fileName;
+            }
+        }
+
+        // Create company record
+        $company = Company::create($data);
+
+        // Dynamically create, migrate, and seed database
+        try {
+            $tenantDb = 'crackers2_' . strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $company->code));
+            
+            $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'pgsql') {
+                $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
+            } else {
+                $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
+            }
+            if (empty($exists)) {
+                DB::connection('central')->statement("CREATE DATABASE $tenantDb");
+            }
+
+            $config = config("database.connections.central");
+            $config['database'] = $tenantDb;
+            config(["database.connections.tenant_migration" => $config]);
+
+            DB::purge('tenant_migration');
+
+            \Illuminate\Support\Facades\Artisan::call('migrate', [
+                '--database' => 'tenant_migration',
+                '--force' => true,
+            ]);
+
+            \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                '--database' => 'tenant_migration',
+                '--class' => 'Database\\Seeders\\CategoryAndProductSeeder',
+                '--force' => true,
+            ]);
+            
+        } catch (\Exception $e) {
+            $company->delete();
+            try {
+                if (isset($tenantDb)) {
+                    DB::connection('central')->statement("DROP DATABASE IF EXISTS $tenantDb");
+                }
+            } catch (\Exception $dbDropEx) {}
+            
+            Log::error('Tenant database setup failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Database setup failed: ' . $e->getMessage()
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'New company domain registered and database created successfully!',
+            'company' => $company
+        ]);
+    }
+
+    /**
+     * Update existing company domain record.
+     */
+    public function updateCompany(Request $request, $id)
+    {
+        Log::info("Company update request received for ID $id:", $request->all());
+
+        $company = Company::findOrFail($id);
+
+        $request->validate([
+            'code' => 'required|string|max:255|unique:companies,code,' . $id,
+            'name' => 'required|string|max:255',
+            'website' => 'required|string|max:255',
+            'contact_1' => 'required|string|max:255',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $data = $request->only([
+            'code', 'name', 'website', 'contact_1', 'contact_2', 'contact_3',
+            'address', 'gst_no', 'pan_no', 'msme_no', 'status',
+            'bank_name_1', 'bank_acc_1', 'bank_ifsc_1', 'bank_branch_1',
+            'bank_name_2', 'bank_acc_2', 'bank_ifsc_2', 'bank_branch_2',
+            'bank_name_3', 'bank_acc_3', 'bank_ifsc_3', 'bank_branch_3',
+            'upi_id_1', 'upi_id_2', 'upi_id_3'
+        ]);
+
+        if (isset($data['website'])) {
+            $websiteClean = strtolower(trim($data['website']));
+            if (($websiteClean === 'localhost' || $websiteClean === '127.0.0.1' || str_starts_with($websiteClean, 'localhost:') || str_starts_with($websiteClean, '127.0.0.1:')) && !str_contains($data['website'], ':')) {
+                $hostOnly = explode(':', $websiteClean)[0];
+                $data['website'] = $hostOnly . ':' . (7000 + $company->id);
+            }
+        }
+
+        $companyCode = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $request->code));
+        $files = ['bank_qr_1', 'bank_qr_2', 'bank_qr_3', 'logo_path', 'favicon_path'];
+        foreach ($files as $file) {
+            if ($request->hasFile($file)) {
+                $request->validate([
+                    $file => 'image|mimes:jpeg,png,jpg,webp,gif|max:3072'
+                ]);
+                
+                $fileName = time() . '_' . $file . '_' . uniqid() . '.' . $request->file($file)->extension();
+                $request->file($file)->move(public_path("uploads/companies/{$companyCode}/profile"), $fileName);
+                $data[$file] = "uploads/companies/{$companyCode}/profile/" . $fileName;
+            }
+        }
+
+        $company->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Company domain record updated successfully!',
+            'company' => $company
+        ]);
+    }
+
+    /**
+     * Toggle company active/inactive status.
+     */
+    public function toggleCompanyStatus($id)
+    {
+        $company = Company::findOrFail($id);
+        $company->status = ($company->status === 'active') ? 'inactive' : 'active';
+        $company->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Company status toggled to {$company->status}.",
+            'company' => $company
+        ]);
+    }
+
+    /**
+     * Delete company domain record.
+     */
+    public function destroyCompany($id)
+    {
+        $company = Company::findOrFail($id);
+        $company->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Company domain record removed successfully.'
+        ]);
+    }
+
+    /**
+     * Fetch Super Admin profile details.
+     */
+    public function profile()
+    {
+        $username = Setting::get('super_admin_username', env('SUPER_ADMIN_USERNAME', 'superadmin'));
+        return response()->json([
+            'success' => true,
+            'username' => $username
+        ]);
+    }
+
+    /**
+     * Update Super Admin username and password.
+     */
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string|max:255',
+            'current_password' => 'required|string',
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $currentActivePassword = Setting::get('super_admin_password');
+        if (!$currentActivePassword) {
+            $currentActivePassword = env('SUPER_ADMIN_PASSWORD', 'superadmin123');
+        }
+
+        $isMatch = false;
+        if (str_starts_with($currentActivePassword, '$2y$') || str_starts_with($currentActivePassword, '$2a$')) {
+            $isMatch = Hash::check($request->current_password, $currentActivePassword);
+        } else {
+            $isMatch = ($request->current_password === $currentActivePassword);
+        }
+
+        if (!$isMatch) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The provided current password does not match our records.'
+            ], 422);
+        }
+
+        Setting::set('super_admin_username', $request->username, 'text');
+
+        if ($request->filled('password')) {
+            Setting::set('super_admin_password', Hash::make($request->password), 'text');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Super Admin profile details updated successfully!'
+        ]);
+    }
+
+    /**
+     * Ensure companies table exists.
+     */
+    protected function ensureCompanyTableExists()
+    {
+        if (!Schema::connection('central')->hasTable('companies')) {
+            Schema::connection('central')->create('companies', function ($table) {
+                $table->id();
+                $table->string('code')->unique();
+                $table->string('name');
+                $table->string('website');
+                $table->string('contact_1');
+                $table->string('contact_2')->nullable();
+                $table->string('contact_3')->nullable();
+                $table->text('address')->nullable();
+                $table->string('gst_no')->nullable();
+                $table->string('pan_no')->nullable();
+                $table->string('msme_no')->nullable();
+                $table->string('bank_name_1')->nullable();
+                $table->string('bank_acc_1')->nullable();
+                $table->string('bank_ifsc_1')->nullable();
+                $table->string('bank_branch_1')->nullable();
+                $table->string('bank_qr_1')->nullable();
+                $table->string('bank_name_2')->nullable();
+                $table->string('bank_acc_2')->nullable();
+                $table->string('bank_ifsc_2')->nullable();
+                $table->string('bank_branch_2')->nullable();
+                $table->string('bank_qr_2')->nullable();
+                $table->string('bank_name_3')->nullable();
+                $table->string('bank_acc_3')->nullable();
+                $table->string('bank_ifsc_3')->nullable();
+                $table->string('bank_branch_3')->nullable();
+                $table->string('bank_qr_3')->nullable();
+                $table->string('upi_id_1')->nullable();
+                $table->string('upi_id_2')->nullable();
+                $table->string('upi_id_3')->nullable();
+                $table->string('logo_path')->nullable();
+                $table->string('favicon_path')->nullable();
+                $table->enum('status', ['active', 'inactive'])->default('active');
+                $table->timestamps();
+            });
+        }
+    }
+}
