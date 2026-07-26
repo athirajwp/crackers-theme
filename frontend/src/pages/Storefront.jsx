@@ -20,6 +20,9 @@ export default function Storefront() {
     setActiveCategory,
     totalQty,
     totalNet,
+    viewMode,
+    changeViewMode,
+    totalFilteredProductsCount,
   } = useStore();
 
   const [deptMenuOpen, setDeptMenuOpen] = useState(false);
@@ -142,42 +145,8 @@ export default function Storefront() {
       <div className="sticky top-0 z-30 bg-gold-500 shadow-lg select-none border-b-2 border-gold-600">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 py-3">
 
-          {/* Left: Shop by Category Dropdown */}
-          <div className="relative w-full md:w-auto">
-            <button
-              onClick={() => setDeptMenuOpen(!deptMenuOpen)}
-              className="w-full md:w-56 bg-crimson-600 hover:bg-crimson-700 text-white font-extrabold text-xs uppercase tracking-wider py-2.5 px-4 rounded-xl flex items-center justify-between gap-1.5 transition-all shadow-sm"
-            >
-              <div className="flex items-center gap-1.5">
-                <i className="fa-solid fa-bars-staggered text-sm"></i>
-                <span>Shop by Category</span>
-              </div>
-              <i className={`fa-solid fa-chevron-down text-[10px] transition-transform duration-200 ${deptMenuOpen ? 'rotate-180' : ''}`}></i>
-            </button>
-
-            {deptMenuOpen && (
-              <div className="absolute left-0 mt-2 w-full md:w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden py-1.5">
-                <button
-                  onClick={() => handleCategorySelect('all')}
-                  className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${activeCategory === 'all' ? 'bg-gold-50 text-gold-700' : 'text-slate-700 hover:bg-slate-50'}`}
-                >
-                  <i className="fa-solid fa-boxes-stacked mr-2 opacity-60"></i> All Products
-                </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => handleCategorySelect(cat.slug)}
-                    className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${activeCategory === cat.slug ? 'bg-gold-50 text-gold-700' : 'text-slate-700 hover:bg-slate-50'}`}
-                  >
-                    <i className="fa-solid fa-fire-flame-curved mr-2 text-crimson-500 opacity-60"></i> {cat.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Center: Search Input */}
-          <div className="relative w-full md:max-w-xl flex items-center">
+          <div className="relative w-full md:max-w-[420px] flex items-center">
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
               <i className="fa-solid fa-magnifying-glass text-xs"></i>
             </span>
@@ -193,10 +162,45 @@ export default function Storefront() {
             </button>
           </div>
 
+          {/* View Mode Toggle Controls & Count */}
+          <div className="flex items-center justify-between w-full md:w-auto gap-4 select-none">
+            <div className="text-xs text-slate-900 font-extrabold whitespace-nowrap">
+              Showing <strong className="text-crimson-850 font-black">{totalFilteredProductsCount}</strong> products
+            </div>
+            <div className="flex items-center bg-white p-0.5 rounded-xl border border-gold-600/60 shadow-sm">
+              <button
+                type="button"
+                onClick={() => changeViewMode('flex')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all duration-200 ${
+                  viewMode === 'flex'
+                    ? 'bg-crimson-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                }`}
+                title="Flex View"
+              >
+                <i className="fa-solid fa-list-ul text-[10px]"></i>
+                <span>Flex</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => changeViewMode('grid')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all duration-200 ${
+                  viewMode === 'grid'
+                    ? 'bg-crimson-600 text-white shadow-sm'
+                    : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+                }`}
+                title="Grid View"
+              >
+                <i className="fa-solid fa-table-cells text-[10px]"></i>
+                <span>Grid</span>
+              </button>
+            </div>
+          </div>
+
           {/* Right: Cart Tally */}
           <button
             onClick={() => setCheckoutOpen(true)}
-            className="hidden md:flex items-center gap-3.5 bg-crimson-600 hover:bg-crimson-700 text-white py-1.5 px-4 rounded-xl shadow-inner transition-colors flex-shrink-0"
+            className="hidden lg:flex items-center gap-3.5 bg-crimson-600 hover:bg-crimson-700 text-white py-1.5 px-4 rounded-xl shadow-inner transition-colors flex-shrink-0"
           >
             <div className="relative">
               <i className="fa-solid fa-bag-shopping text-sm text-gold-500"></i>

@@ -5,6 +5,7 @@ import { useStore } from '../context/StoreContext';
 export default function About() {
   const { settings } = useStore();
   const [activeImage, setActiveImage] = useState(null);
+  const cardBgStyle = { backgroundColor: settings?.card_bg_color || '#EFEBE8' };
 
   const galleryImages = [];
   for (let i = 1; i <= 10; i++) {
@@ -47,7 +48,7 @@ export default function About() {
 
       {/* 2. Content Container Section */}
       <section className="container mx-auto px-4 py-12">
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-10 shadow-sm space-y-12">
+        <div className="border border-[#E2DDD9] rounded-3xl p-6 md:p-10 shadow-sm space-y-12" style={cardBgStyle}>
           
           {/* Main Story block */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -87,8 +88,56 @@ export default function About() {
             </div>
           </div>
 
-          {/* Licenses & Compliance */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          {/* 3. Photo Gallery Section */}
+          <div className="border-t border-slate-100 pt-10 space-y-8">
+            <div className="text-center space-y-3">
+              <span className="inline-flex items-center gap-2 bg-gold-50 border border-gold-200 text-gold-900 text-[11px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-sm">
+                <i className="fa-solid fa-camera-retro text-gold-600 text-sm"></i> Photo Gallery
+              </span>
+              <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+                Our Facilities & Celebrations
+              </h3>
+              <p className="text-xs md:text-sm text-slate-500 max-w-xl mx-auto font-semibold leading-relaxed">
+                Take a virtual tour of our factory, licensed storage facilities, and the joyful celebration moments we help power.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-6 md:gap-8">
+              {displayImages.map((src, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => setActiveImage(src)}
+                  className="group relative bg-white border-2 border-slate-100 hover:border-gold-400 rounded-2xl md:rounded-3xl p-1.5 md:p-2.5 shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden"
+                >
+                  {/* Theme-synced Animated Glow Effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-gold-500 to-crimson-600 rounded-3xl opacity-0 group-hover:opacity-20 blur-md transition-opacity duration-500 pointer-events-none"></div>
+
+                  {/* Responsive Image Container (210px on desktop, 40 on mobile 2-col) */}
+                  <div className="relative w-full h-40 sm:h-48 md:h-[210px] overflow-hidden rounded-xl md:rounded-2xl bg-slate-100">
+                    <img 
+                      src={src.startsWith('http') || src.startsWith('data:') ? src : `/${src}`} 
+                      alt={`Gallery view ${idx + 1}`} 
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                      loading="lazy"
+                    />
+
+                    {/* Gradient Overlay with Expand Icon */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-between p-4">
+                      <span className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <i className="fa-solid fa-sparkles text-gold-400"></i> View Full Photo
+                      </span>
+                      <div className="w-9 h-9 rounded-xl bg-gold-500 text-slate-900 flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform duration-300">
+                        <i className="fa-solid fa-magnifying-glass-plus text-sm"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Licenses & Compliance (Moved to Bottom) */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 mt-8">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-gold-500 flex items-center justify-center text-slate-900 flex-shrink-0 shadow-sm">
                 <i className="fa-solid fa-scale-balanced text-lg text-crimson-600"></i>
@@ -112,8 +161,8 @@ export default function About() {
             </div>
           </div>
 
-          {/* Grid of Key USP Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+          {/* Grid of Key USP Cards (Moved to Bottom) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
             <div className="bg-white border border-slate-200 rounded-2.5xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-full h-1 bg-gold-500"></div>
               <div className="w-10 h-10 rounded-xl bg-gold-500 flex items-center justify-center mb-4 text-crimson-600">
@@ -145,40 +194,6 @@ export default function About() {
               <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">
                 Our logistics network covers major areas across Tamil Nadu, Karnataka, Kerala, Andhra Pradesh, and Telangana via trusted transport carriers.
               </p>
-            </div>
-          </div>
-
-          {/* 3. Image Gallery */}
-          <div className="border-t border-slate-100 pt-8 space-y-6">
-            <div className="text-center space-y-2">
-              <span className="inline-flex items-center gap-1.5 bg-crimson-50 border border-crimson-100 text-crimson-850 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
-                <i className="fa-solid fa-images text-crimson-600"></i> Photo Gallery
-              </span>
-              <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
-                Our Facilities & Celebrations
-              </h3>
-              <p className="text-xs text-slate-500 max-w-lg mx-auto font-semibold">
-                Take a virtual tour of our factory, licensed storage facilities, and some of joyful celebration moments we help power.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {displayImages.map((src, idx) => (
-                <div 
-                  key={idx} 
-                  onClick={() => setActiveImage(src)}
-                  className="relative group overflow-hidden rounded-2xl border border-slate-200 p-1.5 bg-white shadow-sm transition-all duration-300 hover:shadow-md hover:scale-[1.03] active:scale-95 cursor-pointer"
-                >
-                  <div className="w-full h-40 overflow-hidden rounded-xl bg-slate-100">
-                    <img 
-                      src={src.startsWith('http') || src.startsWith('data:') ? src : `/${src}`} 
-                      alt={`Gallery view ${idx + 1}`} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 

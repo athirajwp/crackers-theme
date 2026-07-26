@@ -37,6 +37,9 @@ class StorefrontApiController extends Controller
             'enable_promo_codes' => Setting::get('enable_promo_codes', 'yes'),
             'enable_tax_delivery' => Setting::get('enable_tax_delivery', 'no'),
             'enable_fireworks' => Setting::get('enable_fireworks', 'yes'),
+            'show_mrp' => Setting::get('show_mrp', 'yes'),
+            'card_bg_color' => Setting::get('card_bg_color', '#EFEBE8'),
+            'default_view_mode' => Setting::get('default_view_mode', 'flex'),
             'tax_percent' => Setting::get('tax_percent', 18),
             'delivery_charge' => Setting::get('delivery_charge', 150),
 

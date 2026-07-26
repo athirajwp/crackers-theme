@@ -20,6 +20,9 @@ export const StoreProvider = ({ children }) => {
     enable_promo_codes: 'yes',
     enable_tax_delivery: 'no',
     enable_fireworks: 'yes',
+    show_mrp: 'yes',
+    card_bg_color: '#EFEBE8',
+    default_view_mode: 'flex',
     tax_percent: 18,
     delivery_charge: 150,
   });
@@ -226,6 +229,33 @@ export const StoreProvider = ({ children }) => {
   const deliveryCharge = (enableTaxDelivery && totalQty > 0) ? settings.delivery_charge : 0;
   const finalPayableAmount = postPromoNet + taxAmount + deliveryCharge;
 
+  // View mode state - directly reflects Admin Panel setting
+  const [viewMode, setViewMode] = useState('flex');
+
+  useEffect(() => {
+    if (settings.default_view_mode) {
+      setViewMode(settings.default_view_mode);
+    }
+  }, [settings.default_view_mode]);
+
+  const changeViewMode = (mode) => {
+    setViewMode(mode);
+  };
+
+  // Compute number of filtered products currently shown
+  let totalFilteredProductsCount = 0;
+  categories.forEach((cat) => {
+    if (activeCategory === 'all' || activeCategory === cat.slug) {
+      if (Array.isArray(cat.products)) {
+        cat.products.forEach((prod) => {
+          if (!searchQuery.trim() || prod.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+            totalFilteredProductsCount++;
+          }
+        });
+      }
+    }
+  });
+
   const value = {
     categories,
     settings,
@@ -255,6 +285,10 @@ export const StoreProvider = ({ children }) => {
     setActiveCategory,
     checkoutOpen,
     setCheckoutOpen,
+    viewMode,
+    setViewMode,
+    changeViewMode,
+    totalFilteredProductsCount,
   };
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

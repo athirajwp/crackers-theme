@@ -4,6 +4,7 @@ import { useStore } from '../context/StoreContext';
 
 export default function Contact() {
   const { settings } = useStore();
+  const cardBgStyle = { backgroundColor: settings?.card_bg_color || '#EFEBE8' };
 
   return (
     <div className="relative text-slate-800 select-none bg-transparent pb-16">
@@ -23,7 +24,7 @@ export default function Contact() {
 
       {/* 2. Main Content Section */}
       <section className="container mx-auto px-4 py-12">
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-10 shadow-sm space-y-10">
+        <div className="border border-[#E2DDD9] rounded-3xl p-6 md:p-10 shadow-sm space-y-10" style={cardBgStyle}>
 
           {/* Section Title */}
           <div className="text-center space-y-3 max-w-2xl mx-auto">
@@ -42,7 +43,7 @@ export default function Contact() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
 
             {/* Left Column: Contact Details Card */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 md:p-8 space-y-6">
+            <div className="bg-white/80 border border-[#E2DDD9] rounded-2xl p-6 md:p-8 space-y-6">
 
               {/* Address */}
               <div className="flex items-start gap-4">

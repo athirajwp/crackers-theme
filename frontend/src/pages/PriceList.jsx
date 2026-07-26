@@ -92,10 +92,12 @@ export default function PriceList() {
   let snoDesktop = 1;
   let snoMobile = 1;
 
+  const cardBgStyle = { backgroundColor: settings?.card_bg_color || '#EFEBE8' };
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 select-none">
       {/* Header control bar (Hidden during print) */}
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mb-8 gap-4 print:hidden">
+      <div className="flex flex-col md:flex-row justify-between items-center border border-[#E2DDD9] rounded-2xl p-5 shadow-sm mb-8 gap-4 print:hidden" style={cardBgStyle}>
         <div>
           <h2 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <i className="fa-solid fa-list-check text-crimson-600"></i> Wholesale Price List
@@ -133,10 +135,11 @@ export default function PriceList() {
       {/* Official Printable Invoice/Price Registry Document */}
       <div
         id="price-list-document"
-        className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden print:border-0 print:shadow-none print:p-0"
+        className="border border-[#E2DDD9] rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden print:border-0 print:shadow-none print:p-0"
+        style={cardBgStyle}
       >
         {/* Header Branding (Visible on Print and Screen) */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200 pb-6 mb-6 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#E2DDD9] pb-6 mb-6 gap-4">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-crimson-700 uppercase leading-none">
               {settings.store_name}
@@ -163,12 +166,11 @@ export default function PriceList() {
         </div>
 
         {/* Table Registry Container */}
-        {/* Table Registry Container */}
-        <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-inner print:border-0">
+        <div className="border border-[#E2DDD9] rounded-2xl overflow-hidden shadow-inner print:border-0">
           {/* Desktop Table (Visible on MD screens and during printing) */}
           <table className="hidden md:table w-full text-left text-xs border-collapse print:table">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-650 font-extrabold uppercase tracking-wider text-[9px]">
+              <tr className="bg-[#E5DFDA]/80 border-b border-[#E2DDD9] text-slate-650 font-extrabold uppercase tracking-wider text-[9px]">
                 <th className="py-3 px-3 sm:px-4 w-12 text-center">S.No</th>
                 <th className="py-3 px-4">Product Details</th>
                 <th className="py-3 px-4 w-32 text-center">Pack / Box size</th>
@@ -201,7 +203,7 @@ export default function PriceList() {
                           {product.pack_size}
                         </td>
                         <td className="py-3 px-4 text-right line-through text-slate-400 font-mono">
-                          ₹{formatCurrency(product.mrp)}
+                          {settings.show_mrp !== 'no' ? `₹${formatCurrency(product.mrp)}` : '—'}
                         </td>
                         <td className="py-3 px-4 text-right text-emerald-600 font-mono">
                           ₹{formatCurrency(product.mrp * (settings.discount_percent / 100))}
@@ -244,9 +246,11 @@ export default function PriceList() {
 
                       <div className="flex justify-between items-center mt-1">
                         <div className="flex items-center gap-2">
-                          <span className="line-through text-[11px] text-slate-400 font-mono">
-                            ₹{formatCurrency(product.mrp)}
-                          </span>
+                          {settings.show_mrp !== 'no' && (
+                            <span className="line-through text-[11px] text-slate-400 font-mono">
+                              ₹{formatCurrency(product.mrp)}
+                            </span>
+                          )}
                           <span className="text-[9px] text-emerald-600 bg-emerald-50 font-bold px-1.5 py-0.5 rounded-md">
                             {settings.discount_percent}% OFF
                           </span>

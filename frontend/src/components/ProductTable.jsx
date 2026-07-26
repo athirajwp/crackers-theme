@@ -4,6 +4,7 @@ import { useStore } from '../context/StoreContext';
 export default function ProductTable() {
   const {
     categories,
+    settings,
     cart,
     increaseQty,
     decreaseQty,
@@ -12,16 +13,10 @@ export default function ProductTable() {
     setActiveCategory,
     searchQuery,
     setSearchQuery,
+    viewMode,
   } = useStore();
 
   const [popProduct, setPopProduct] = useState(null);
-
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('athi_view_mode') || 'flex');
-
-  const changeViewMode = (mode) => {
-    setViewMode(mode);
-    localStorage.setItem('athi_view_mode', mode);
-  };
 
   const [collapsedCategories, setCollapsedCategories] = useState(new Set());
 
@@ -69,12 +64,14 @@ export default function ProductTable() {
     }
   });
 
+  const cardBgStyle = { backgroundColor: settings?.card_bg_color || '#EFEBE8' };
+
   return (
     <section id="quick-order" className="container mx-auto px-4 py-10 flex flex-col lg:flex-row gap-8 items-start">
       {/* Left: Category sidebar filters (Hidden on Mobile, Sticky on Desktop) */}
       <aside className="hidden lg:block lg:w-64 flex-shrink-0 lg:sticky lg:top-24 space-y-4 select-none">
-        <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
-          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest border-b border-slate-150 pb-2.5 mb-3 flex justify-between items-center">
+        <div className="border border-[#E2DDD9] p-4 rounded-2xl shadow-sm" style={cardBgStyle}>
+          <h3 className="text-sm font-bold text-slate-700 uppercase tracking-widest border-b border-[#E2DDD9] pb-2.5 mb-3 flex justify-between items-center">
             <span>Categories</span>
             <i className="fa-solid fa-filter text-slate-400 text-xs"></i>
           </h3>
@@ -84,7 +81,7 @@ export default function ProductTable() {
               className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-2 whitespace-nowrap transition-all duration-200 ${
                 activeCategory === 'all'
                   ? 'bg-crimson-600 text-white font-extrabold shadow'
-                  : 'text-slate-650 hover:bg-slate-100'
+                  : 'text-slate-650 hover:bg-[#E5DFDA]/60'
               }`}
             >
               <i className="fa-solid fa-boxes-stacked text-[11px] opacity-80"></i> All Products
@@ -96,7 +93,7 @@ export default function ProductTable() {
                 className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-2 whitespace-nowrap transition-all duration-200 ${
                   activeCategory === cat.slug
                     ? 'bg-crimson-600 text-white font-extrabold shadow'
-                    : 'text-slate-655 hover:bg-slate-100'
+                    : 'text-slate-655 hover:bg-[#E5DFDA]/60'
                 }`}
               >
                 <i className="fa-solid fa-fire-flame-curved text-[11px] opacity-80"></i> {cat.name}
@@ -108,64 +105,15 @@ export default function ProductTable() {
 
       {/* Right: Product list spreadsheet */}
       <div className="flex-grow w-full space-y-6">
-        {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
-          <div className="relative w-full sm:max-w-md">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-              <i className="fa-solid fa-magnifying-glass text-xs"></i>
-            </span>
-            <input
-              type="text"
-              placeholder="Search firecrackers by name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 focus:border-slate-350 focus:bg-white rounded-xl py-2 pl-10 pr-4 text-xs text-slate-700 placeholder-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition-all"
-            />
-          </div>
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto justify-between sm:justify-end select-none">
-            <div className="text-xs text-slate-500 font-semibold">
-              Showing <strong className="text-crimson-600">{totalFilteredProductsCount}</strong> products
-            </div>
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200">
-              <button
-                type="button"
-                onClick={() => changeViewMode('flex')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all duration-200 ${
-                  viewMode === 'flex'
-                    ? 'bg-white text-crimson-600 shadow-sm border border-slate-200/50'
-                    : 'text-slate-550 hover:text-slate-800'
-                }`}
-                title="Flex View"
-              >
-                <i className="fa-solid fa-list-ul text-[10px]"></i>
-                <span>Flex</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => changeViewMode('grid')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black flex items-center gap-1.5 transition-all duration-200 ${
-                  viewMode === 'grid'
-                    ? 'bg-white text-crimson-600 shadow-sm border border-slate-200/50'
-                    : 'text-slate-550 hover:text-slate-800'
-                }`}
-                title="Grid View"
-              >
-                <i className="fa-solid fa-table-cells text-[10px]"></i>
-                <span>Grid</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Conditional Layout Rendering */}
         {viewMode === 'flex' ? (
-          <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="border border-[#E2DDD9] rounded-2xl overflow-hidden shadow-sm" style={cardBgStyle}>
             
             {/* Desktop View Table */}
             <div className="hidden sm:block overflow-x-auto sm:overflow-visible">
               <table className="w-full border-collapse text-left text-xs">
                 <thead>
-                  <tr className="bg-slate-100/60 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px] select-none">
+                  <tr className="bg-[#E5DFDA]/80 border-b border-[#E2DDD9] text-slate-600 font-bold uppercase tracking-wider text-[10px] select-none">
                     <th className="py-4 px-3 sm:px-4">Cracker Details</th>
                     <th className="hidden sm:table-cell py-4 px-4 w-28 text-center">Unit / Box</th>
                     <th className="py-4 px-3 sm:px-4 w-24 sm:w-36 text-right">Price (₹)</th>
@@ -248,7 +196,9 @@ export default function ProductTable() {
 
                               {/* Prices */}
                               <td className="py-3.5 px-3 sm:px-4 text-right">
-                                <div className="text-slate-400 text-[10px] line-through">₹{formatCurrency(prod.mrp)}</div>
+                                {settings?.show_mrp !== 'no' && (
+                                  <div className="text-slate-400 text-[10px] line-through">₹{formatCurrency(prod.mrp)}</div>
+                                )}
                                 <div className="text-crimson-655 font-extrabold">₹{formatCurrency(prod.selling_price)}</div>
                               </td>
 
@@ -361,7 +311,9 @@ export default function ProductTable() {
 
                             {/* Price */}
                             <div className="text-left flex-shrink-0 px-1">
-                              <div className="text-slate-400 text-[9px] line-through font-bold leading-tight">₹{formatCurrency(prod.mrp)}</div>
+                              {settings?.show_mrp !== 'no' && (
+                                <div className="text-slate-400 text-[9px] line-through font-bold leading-tight">₹{formatCurrency(prod.mrp)}</div>
+                              )}
                               <div className="text-slate-800 font-extrabold text-[11px] leading-tight">₹{formatCurrency(prod.selling_price)}</div>
                             </div>
 
@@ -422,7 +374,8 @@ export default function ProductTable() {
                   {/* Category Section Header */}
                   <div
                     onClick={() => toggleCategoryCollapse(cat.slug)}
-                    className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between text-crimson-655 font-bold tracking-wider cursor-pointer hover:bg-slate-50 transition-colors select-none shadow-sm"
+                    className="border border-[#E2DDD9] rounded-2xl p-4 flex items-center justify-between text-crimson-655 font-bold tracking-wider cursor-pointer hover:opacity-90 transition-colors select-none shadow-sm"
+                    style={cardBgStyle}
                   >
                     <div className="flex items-center gap-2">
                       <i className="fa-solid fa-fire text-xs text-crimson-500 animate-pulse"></i>
@@ -437,7 +390,7 @@ export default function ProductTable() {
 
                   {/* Grid of Product Cards */}
                   {!isCollapsed && (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
                       {filteredProducts.map((prod) => {
                         const cartItem = cart[prod.id];
                         const qty = cartItem ? cartItem.qty : 0;
@@ -446,25 +399,26 @@ export default function ProductTable() {
                         return (
                           <div
                             key={prod.id}
-                            className={`bg-white border rounded-2xl p-2 sm:p-4 flex flex-col justify-between hover:shadow-md transition-all duration-200 relative overflow-hidden group ${
-                              qty > 0 ? 'border-crimson-300 ring-1 ring-crimson-200/50 bg-crimson-50/5' : 'border-slate-200'
+                            style={qty > 0 ? undefined : cardBgStyle}
+                            className={`border rounded-2xl p-2.5 sm:p-3 flex flex-col justify-between hover:shadow-md transition-all duration-200 relative overflow-hidden group ${
+                              qty > 0 ? 'border-crimson-300 ring-1 ring-crimson-200/50 bg-crimson-50/20' : 'border-[#E2DDD9]'
                             }`}
                           >
                             {/* Upper Card Area: Image + Details */}
-                            <div className="space-y-2 sm:space-y-3">
+                            <div className="space-y-1.5 sm:space-y-2">
                               {/* Image Container with Hover Effect */}
                               <div 
-                                className={`w-full h-24 xs:h-32 sm:h-32 md:h-36 lg:h-32 xl:h-36 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative ${prod.image ? 'cursor-pointer hover:opacity-95 transition-opacity' : ''}`}
+                                className={`w-full h-36 sm:h-40 rounded-xl bg-white border border-slate-200/80 flex items-center justify-center overflow-hidden relative ${prod.image ? 'cursor-pointer hover:opacity-95 transition-opacity' : ''}`}
                                 onClick={prod.image ? () => setPopProduct({ prod, catName: cat.name }) : undefined}
                               >
                                 {prod.image ? (
                                   <img
                                     src={`/${prod.image}`}
                                     alt={prod.name}
-                                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                                    className="object-contain w-full h-full p-1.5 group-hover:scale-105 transition-transform duration-300"
                                   />
                                 ) : (
-                                  <i className="fa-solid fa-sparkles text-2xl sm:text-3xl text-crimson-450/30"></i>
+                                  <i className="fa-solid fa-sparkles text-2xl text-crimson-450/30"></i>
                                 )}
 
                                 {/* Category Label Overlay */}
@@ -473,38 +427,39 @@ export default function ProductTable() {
                                 </span>
 
                                 {/* Pack size Label Overlay */}
-                                <span className="absolute top-1.5 right-1.5 text-[7px] sm:text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-lg font-mono">
+                                <span className="absolute top-1.5 right-1.5 text-[7px] sm:text-[8.5px] font-bold text-slate-500 bg-slate-100/90 border border-slate-200 px-1.5 py-0.5 rounded-lg font-mono">
                                   {prod.pack_size}
                                 </span>
                               </div>
 
                               {/* Title & Info */}
-                              <div className="space-y-0.5 sm:space-y-1">
-                                <h4 className="font-extrabold text-slate-800 text-[11px] sm:text-xs md:text-sm line-clamp-2 leading-snug min-h-[2rem] sm:min-h-[2.5rem]">
+                              <div className="pt-0.5">
+                                <h4 className="font-extrabold text-slate-800 text-xs sm:text-xs leading-snug line-clamp-2">
                                   {prod.name}
                                 </h4>
                               </div>
                             </div>
 
                             {/* Lower Card Area: Pricing & Actions */}
-                            <div className="mt-2 pt-2 sm:mt-4 sm:pt-3 border-t border-slate-100 space-y-2 sm:space-y-3">
+                            <div className="mt-2 pt-2 border-t border-slate-200/70 space-y-1.5">
                               {/* Prices Row */}
                               <div className="flex items-baseline justify-between gap-1">
                                 <span className="text-[9px] sm:text-[10px] text-slate-400 font-semibold">Price:</span>
                                 <div className="text-right">
-                                  <span className="text-slate-400 text-[9px] sm:text-[10px] line-through mr-1 sm:mr-1.5 font-bold">₹{formatCurrency(prod.mrp)}</span>
+                                  {settings?.show_mrp !== 'no' && (
+                                    <span className="text-slate-400 text-[9px] sm:text-[10px] line-through mr-1 font-bold">₹{formatCurrency(prod.mrp)}</span>
+                                  )}
                                   <span className="text-crimson-650 font-black text-xs sm:text-sm">₹{formatCurrency(prod.selling_price)}</span>
                                 </div>
                               </div>
 
-                              {/* Qty Selector & Subtotal */}
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-                                {/* Quantity selectors */}
-                                <div className="inline-flex items-center bg-slate-100 border border-slate-200 rounded-lg p-0.5 select-none w-full sm:w-auto justify-between">
+                              {/* Qty Selector */}
+                              <div className="flex items-center justify-between gap-1 pt-0.5">
+                                <div className="inline-flex items-center bg-slate-100/80 border border-slate-200 rounded-lg p-0.5 select-none w-full justify-between">
                                   <button
                                     type="button"
                                     onClick={() => decreaseQty(prod.id)}
-                                    className="w-5 h-5 sm:w-7 sm:h-7 text-slate-655 hover:text-slate-900 hover:bg-white rounded flex items-center justify-center font-bold text-xs transition-colors shadow-sm"
+                                    className="w-5 h-5 sm:w-6 sm:h-6 text-slate-655 hover:text-slate-900 hover:bg-white rounded flex items-center justify-center font-bold text-xs transition-colors shadow-sm"
                                   >
                                     <i className="fa-solid fa-minus text-[7px] sm:text-[8px]"></i>
                                   </button>
@@ -513,25 +468,15 @@ export default function ProductTable() {
                                     value={qty || ''}
                                     onChange={(e) => updateQty(prod, e.target.value)}
                                     placeholder="0"
-                                    className="w-6 sm:w-10 text-center bg-transparent border-0 text-[10px] sm:text-xs font-black text-slate-800 placeholder-slate-400 focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    className="w-6 sm:w-8 text-center bg-transparent border-0 text-[10px] sm:text-xs font-black text-slate-800 placeholder-slate-400 focus:ring-0 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                   />
                                   <button
                                     type="button"
                                     onClick={() => increaseQty(prod)}
-                                    className="w-5 h-5 sm:w-7 sm:h-7 text-slate-655 hover:text-slate-900 hover:bg-white rounded flex items-center justify-center font-bold text-xs transition-colors shadow-sm"
+                                    className="w-5 h-5 sm:w-6 sm:h-6 text-slate-655 hover:text-slate-900 hover:bg-white rounded flex items-center justify-center font-bold text-xs transition-colors shadow-sm"
                                   >
                                     <i className="fa-solid fa-plus text-[7px] sm:text-[8px]"></i>
                                   </button>
-                                </div>
-
-                                {/* Sub Total */}
-                                <div className="text-right hidden sm:block">
-                                  {qty > 0 ? (
-                                    <div className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Subtotal</div>
-                                  ) : null}
-                                  <span className="font-black text-xs text-crimson-600">
-                                    {qty > 0 ? `₹${formatCurrency(rowTotal)}` : '—'}
-                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -603,10 +548,12 @@ export default function ProductTable() {
 
                   {/* Prices & Savings */}
                   <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4 space-y-2">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Original MRP:</span>
-                      <span className="text-slate-400 font-bold line-through text-xs sm:text-sm">₹{formatCurrency(prod.mrp)}</span>
-                    </div>
+                    {settings?.show_mrp !== 'no' && (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Original MRP:</span>
+                        <span className="text-slate-400 font-bold line-through text-xs sm:text-sm">₹{formatCurrency(prod.mrp)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-baseline">
                       <span className="text-[10px] text-slate-550 font-extrabold uppercase tracking-wider">Wholesale Price:</span>
                       <span className="text-crimson-600 font-black text-lg sm:text-xl">₹{formatCurrency(prod.selling_price)}</span>
