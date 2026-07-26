@@ -5,6 +5,7 @@ import HeroSlider from '../components/HeroSlider';
 import ProductTable from '../components/ProductTable';
 import CartFooter from '../components/CartFooter';
 import CheckoutDrawer from '../components/CheckoutDrawer';
+import diwaliKidsHD from '../assets/diwali-kids-hd.jpg';
 
 export default function Storefront() {
   const {
@@ -51,19 +52,31 @@ export default function Storefront() {
 
       {/* 2. Welcome & Value Proposition Grid */}
       <section className="container mx-auto px-4 py-8 select-none z-10 relative">
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm space-y-8">
+        <div className="bg-[#EFEBE8] border border-[#E2DDD9] rounded-3xl p-6 md:p-8 shadow-sm space-y-8">
 
-          {/* Welcome Text Block */}
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <span className="inline-flex items-center gap-1.5 bg-gold-50 border border-gold-200 text-gold-800 text-[10px] font-black uppercase tracking-widest px-3.5 py-1 rounded-full shadow-sm">
-              <i className="fa-solid fa-star text-gold-600"></i> Sivakasi Direct Wholesale Shop
-            </span>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
-              Welcome to <span className="text-crimson-500">{settings.store_name?.toUpperCase() || 'CRACKER SHOPE'}</span>
-            </h2>
-            <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">
-              We are Sivakasi's premier online fireworks ordering platform. Choose from our extensive collection of sparkles, chakkars, flower pots, sound crackers, and fancy sky displays at unbeatable factory rates with <strong className="text-crimson-600 font-extrabold">Flat {settings.discount_percent}% Discount!</strong>
-            </p>
+          {/* Welcome Text & Image Block */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            {/* Left: Text Content */}
+            <div className="md:col-span-7 space-y-4 text-center md:text-left">
+              <span className="inline-flex items-center gap-1.5 bg-gold-50 border border-gold-200 text-gold-800 text-[10px] font-black uppercase tracking-widest px-3.5 py-1 rounded-full shadow-sm">
+                <i className="fa-solid fa-star text-gold-600"></i> Sivakasi Direct Wholesale Shop
+              </span>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 leading-tight">
+                Welcome to <span className="text-crimson-500">{settings.store_name?.toUpperCase() || 'CRACKER SHOPE'}</span>
+              </h2>
+              <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">
+                We are Sivakasi's premier online fireworks ordering platform. Choose from our extensive collection of sparkles, chakkars, flower pots, sound crackers, and fancy sky displays at unbeatable factory rates with <strong className="text-crimson-600 font-extrabold">Flat {settings.discount_percent}% Discount!</strong>
+              </p>
+            </div>
+
+            {/* Right: Diwali Kids Image */}
+            <div className="md:col-span-5 flex justify-center items-center overflow-hidden">
+              <img
+                src={diwaliKidsHD}
+                alt="Diwali Fireworks Celebration"
+                className="w-full max-w-sm md:max-w-md lg:max-w-lg max-h-72 md:max-h-80 lg:max-h-96 object-contain drop-shadow-sm transition-transform duration-500 hover:scale-105"
+              />
+            </div>
           </div>
 
           {/* Value Proposition Row */}
