@@ -19,64 +19,30 @@ export default function Footer() {
     <>
       <footer className="bg-slate-900 text-slate-350 border-t-4 border-gold-500 mt-auto select-none pt-16 pb-8">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             
-            {/* Quick navigation */}
-            <div className="space-y-4">
-              <h4 className="text-xs font-black text-white uppercase tracking-widest border-b border-slate-800 pb-2.5">
-                Quick Navigation
-              </h4>
-              <ul className="space-y-2.5 text-xs font-bold text-slate-400">
-                <li>
-                  <Link to="/" className="hover:text-gold-500 transition-colors flex items-center">
-                    <i className="fa-solid fa-chevron-right mr-2 text-[8px] text-gold-500"></i>Home Page
-                  </Link>
-                </li>
-                <li>
-                  <a href="/#quick-order" className="hover:text-gold-500 transition-colors flex items-center">
-                    <i className="fa-solid fa-chevron-right mr-2 text-[8px] text-gold-500"></i>Quick Order Sheet
-                  </a>
-                </li>
-                <li>
-                  <Link to="/price-list" className="hover:text-gold-500 transition-colors flex items-center">
-                    <i className="fa-solid fa-chevron-right mr-2 text-[8px] text-gold-500"></i>Price List Summary
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/track" className="hover:text-gold-500 transition-colors flex items-center">
-                    <i className="fa-solid fa-chevron-right mr-2 text-[8px] text-gold-500"></i>Track Order Status
-                  </Link>
-                </li>
-                <li>
-                  <a href={`/admin/login${location.search}`} target="_blank" rel="noreferrer" className="hover:text-gold-500 transition-colors flex items-center">
-                    <i className="fa-solid fa-chevron-right mr-2 text-[8px] text-gold-500"></i>Admin Portal Login
-                  </a>
-                </li>
-              </ul>
-            </div>
-
             {/* Contact details */}
             <div className="space-y-4">
-              <h4 className="text-xs font-black text-white uppercase tracking-widest border-b border-slate-800 pb-2.5">
-                Contact Details
+              <h4 className="text-xs md:text-sm font-black text-white uppercase tracking-widest border-b border-gold-500/80 pb-2.5 flex items-center gap-2">
+                <i className="fa-solid fa-address-card text-gold-500"></i> Contact Details
               </h4>
-              <ul className="space-y-3.5 text-xs text-slate-400 font-bold">
+              <ul className="space-y-3 text-xs md:text-sm text-slate-300 font-bold">
                 <li className="flex items-start gap-2.5 leading-normal">
-                  <i className="fa-solid fa-location-dot text-gold-500 mt-0.5"></i>
+                  <i className="fa-solid fa-location-dot text-gold-400 mt-0.5 flex-shrink-0"></i>
                   <span>{settings.store_address}</span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <i className="fa-solid fa-phone text-gold-500"></i>
-                  <a href={`tel:${settings.store_phone}`} className="hover:text-gold-500 transition-colors">{settings.store_phone}</a>
+                  <i className="fa-solid fa-phone text-gold-400 flex-shrink-0"></i>
+                  <a href={`tel:${settings.store_phone}`} className="hover:text-gold-400 transition-colors font-extrabold text-white">{settings.store_phone}</a>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <i className="fa-solid fa-envelope text-gold-500"></i>
-                  <a href={`mailto:${settings.store_email}`} className="hover:text-gold-500 transition-colors">{settings.store_email}</a>
+                  <i className="fa-solid fa-envelope text-gold-400 flex-shrink-0"></i>
+                  <a href={`mailto:${settings.store_email}`} className="hover:text-gold-400 transition-colors text-slate-300">{settings.store_email}</a>
                 </li>
               </ul>
               
               {/* Google Map iframe */}
-              <div className="map-container w-full h-48 rounded-2xl overflow-hidden border border-slate-800 shadow [&_iframe]:w-full [&_iframe]:h-full [&>div]:w-full [&>div]:h-full">
+              <div className="map-container w-full h-44 md:h-48 rounded-xl overflow-hidden border border-slate-700/80 shadow-md [&_iframe]:w-full [&_iframe]:h-full [&>div]:w-full [&>div]:h-full mt-3">
                 {settings.store_map_iframe ? (
                   <div dangerouslySetInnerHTML={{ __html: settings.store_map_iframe }} className="w-full h-full" />
                 ) : (
@@ -96,34 +62,44 @@ export default function Footer() {
 
             {/* Safety guidelines */}
             <div className="space-y-4">
-              <h4 className="text-xs font-black text-white uppercase tracking-widest border-b border-slate-800 pb-2.5">
-                Safety Disclaimer
+              <h4 className="text-xs md:text-sm font-black text-white uppercase tracking-widest border-b border-gold-500/80 pb-2.5 flex items-center gap-2">
+                <i className="fa-solid fa-shield-cat text-gold-500"></i> Safety Disclaimer
               </h4>
-              <div className="bg-slate-950/40 border border-slate-800 p-4 rounded-2xl text-[10px] text-slate-400 leading-relaxed space-y-2 font-bold">
-                <p className="text-gold-500 font-black flex items-center gap-1.5">
-                  <i className="fa-solid fa-triangle-exclamation animate-pulse"></i>Burst Wisely & Safely:
+              <div className="bg-slate-800/50 border border-slate-700/80 p-4 rounded-xl text-[11px] md:text-xs text-slate-300 leading-relaxed space-y-2.5 font-medium shadow-inner">
+                <p className="text-gold-400 font-black text-xs md:text-sm flex items-center gap-1.5">
+                  <i className="fa-solid fa-triangle-exclamation animate-pulse text-amber-400"></i> Burst Wisely & Safely:
                 </p>
-                <p>1. Keep a water bucket & fire extinguisher handy when bursting crackers.</p>
-                <p>2. Children must always perform fireworks under strict adult supervision.</p>
-                <p>3. Do not wear loose synthetic clothes near crackers; prefer thick cotton.</p>
+                <p className="flex items-start gap-1.5">
+                  <span className="text-gold-400 font-bold">1.</span> Keep a water bucket & fire extinguisher handy when bursting crackers.
+                </p>
+                <p className="flex items-start gap-1.5">
+                  <span className="text-gold-400 font-bold">2.</span> Children must always perform fireworks under strict adult supervision.
+                </p>
+                <p className="flex items-start gap-1.5">
+                  <span className="text-gold-400 font-bold">3.</span> Do not wear loose synthetic clothes near crackers; prefer thick cotton.
+                </p>
               </div>
             </div>
 
             {/* Supreme Court compliance notice */}
             <div className="space-y-4">
-              <h4 className="text-xs font-black text-white uppercase tracking-widest border-b border-slate-800 pb-2.5">
-                Supreme Court Compliance
+              <h4 className="text-xs md:text-sm font-black text-white uppercase tracking-widest border-b border-gold-500/80 pb-2.5 flex items-center gap-2">
+                <i className="fa-solid fa-gavel text-gold-500"></i> Supreme Court Compliance
               </h4>
-              <div className="bg-slate-950/40 border border-slate-800 p-4 rounded-2xl text-[10px] text-slate-400 leading-relaxed space-y-2 font-bold">
-                <p>
+              <div className="bg-slate-800/50 border border-slate-700/80 p-4 rounded-xl text-[11px] md:text-xs text-slate-300 leading-relaxed space-y-2.5 font-medium shadow-inner">
+                <p className="leading-relaxed">
                   As per 2018 Supreme Court Order, Online Sale of Firecrackers is NOT permitted. We follow 100% legal & statutory compliances.
                 </p>
-                <p>
-                  License Name: <strong className="text-white font-black">{settings.license_name || 'Jallikattu Crackers'}</strong>
-                </p>
-                <p>
-                  License No: <strong className="text-white font-black font-mono">{settings.license_no || '123/ABCD/2024'}</strong>
-                </p>
+                <div className="pt-2 border-t border-slate-700/80 space-y-1.5 text-[11px] md:text-xs">
+                  <p className="flex justify-between items-center">
+                    <span className="text-slate-400">License Name:</span>
+                    <strong className="text-white font-bold">{settings.license_name || 'Jallikattu Crackers'}</strong>
+                  </p>
+                  <p className="flex justify-between items-center">
+                    <span className="text-slate-400">License No:</span>
+                    <strong className="text-gold-400 font-bold font-mono">{settings.license_no || '123/ABCD/2024'}</strong>
+                  </p>
+                </div>
               </div>
             </div>
 
