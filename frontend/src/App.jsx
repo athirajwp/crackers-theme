@@ -186,16 +186,16 @@ function PublicLayout() {
         <Outlet />
       </main>
 
-      {/* Left Floating Action Contact Buttons (Call & WhatsApp) — 30% smaller, hidden when cart/checkout active */}
+      {/* Left Floating Action Contact Buttons (Call & WhatsApp) — 10% larger, hidden when cart/checkout active */}
       {!checkoutOpen && totalQty === 0 && (
-        <div className="fixed left-3.5 bottom-5 z-40 flex flex-col gap-2 select-none">
+        <div className="fixed left-4 bottom-5 z-40 flex flex-col gap-2.5 select-none">
           {/* Call Button */}
           <a
             href={`tel:${settings.store_phone || ''}`}
-            className="group flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-crimson-600 hover:bg-crimson-700 text-white rounded-full shadow-lg shadow-crimson-900/30 hover:scale-110 active:scale-95 transition-all duration-300"
+            className="group flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-crimson-600 hover:bg-crimson-700 text-white rounded-full shadow-lg shadow-crimson-900/30 hover:scale-110 active:scale-95 transition-all duration-300"
             title="Call Us Now"
           >
-            <i className="fa-solid fa-phone-volume text-xs sm:text-sm animate-bounce"></i>
+            <i className="fa-solid fa-phone-volume text-sm sm:text-base animate-bounce"></i>
           </a>
 
           {/* WhatsApp Button */}
@@ -203,10 +203,10 @@ function PublicLayout() {
             href={`https://wa.me/${settings.store_whatsapp || '919998887776'}`}
             target="_blank"
             rel="noreferrer"
-            className="group flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-900/30 hover:scale-110 active:scale-95 transition-all duration-300"
+            className="group flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-900/30 hover:scale-110 active:scale-95 transition-all duration-300"
             title="Chat on WhatsApp"
           >
-            <i className="fa-brands fa-whatsapp text-sm sm:text-base"></i>
+            <i className="fa-brands fa-whatsapp text-base sm:text-lg"></i>
           </a>
         </div>
       )}

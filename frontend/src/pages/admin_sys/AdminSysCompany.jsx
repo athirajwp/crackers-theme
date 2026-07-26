@@ -260,7 +260,7 @@ export default function AdminSysCompany() {
                   <th className="py-3.5 px-4 w-64 border-r border-slate-800">Address</th>
                   <th className="py-3.5 px-4 w-32 border-r border-slate-800">GST / Tax Info</th>
                   <th className="py-3.5 px-4 w-28 text-center border-r border-slate-800">Status</th>
-                  <th className="py-3.5 px-4 w-28 text-center">Action</th>
+                  <th className="py-3.5 px-4 w-36 text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 font-semibold text-slate-700">
@@ -332,6 +332,16 @@ export default function AdminSysCompany() {
                       </td>
 
                       <td className="py-3.5 px-4 text-center space-x-1.5 whitespace-nowrap">
+                        {/* Client Admin Portal Button */}
+                        <a
+                          href={`/admin/login?company=${company.code}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-amber-400 hover:text-amber-300 transition-colors shadow-sm"
+                          title={`Open Client Admin Portal (${company.name})`}
+                        >
+                          <i className="fa-solid fa-user-shield text-xs"></i>
+                        </a>
                         <button
                           onClick={() => handleOpenEdit(company)}
                           className="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 transition-colors shadow-sm"
