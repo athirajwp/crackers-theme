@@ -117,12 +117,12 @@ Route::prefix('api')->group(function () {
 
             if (empty($apiKey)) {
                 $output .= "ERROR: AiSensy API Key is empty! Please paste your key in Admin > Settings.\n";
-                return response($output, 400)->header('Content-Type', 'text/plain');
+                return response($output, 200)->header('Content-Type', 'text/plain');
             }
 
             if (empty($campaign)) {
                 $output .= "ERROR: AiSensy Campaign Name is empty! Please enter your approved campaign name in Admin > Settings.\n";
-                return response($output, 400)->header('Content-Type', 'text/plain');
+                return response($output, 200)->header('Content-Type', 'text/plain');
             }
 
             $output .= "Sending test API POST request to https://backend.aisensy.com/campaign/t1/api/v2 ...\n\n";
@@ -142,9 +142,10 @@ Route::prefix('api')->group(function () {
             $output .= "HTTP Status Code: " . $response->status() . "\n";
             $output .= "AiSensy Response Raw Body:\n" . $response->body() . "\n";
 
-            return response($output)->header('Content-Type', 'text/plain');
+            return response($output, 200)->header('Content-Type', 'text/plain');
         } catch (\Throwable $e) {
-            return response("TEST EXCEPTION: " . $e->getMessage() . "\n\nTrace:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
+            return response("TEST EXCEPTION ENCOUNTERED:\n" . $e->getMessage() . "\n\nTrace:\n" . $e->getTraceAsString(), 200)->header('Content-Type', 'text/plain');
+        }
     });
 });
 
