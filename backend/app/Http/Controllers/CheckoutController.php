@@ -212,10 +212,10 @@ class CheckoutController extends Controller
                     $custPhone = preg_replace('/[^0-9]/', '', $order->whatsapp ?: $order->phone);
                     if (strlen($custPhone) === 10) $custPhone = '91' . $custPhone;
 
-                    \Illuminate\Support\Facades\Http::post('https://backend.aisensy.com/campaign/t1/api/v2', [
+                    $resCust = \Illuminate\Support\Facades\Http::post('https://backend.aisensy.com/campaign/t1/api/v2', [
                         'apiKey' => $aisensyKey,
                         'campaignName' => $aisensyCampaign,
-                        'destination' => '+' . $custPhone,
+                        'destination' => $custPhone,
                         'userName' => $order->name,
                         'templateParams' => [
                             $order->order_number,
@@ -224,14 +224,16 @@ class CheckoutController extends Controller
                         ]
                     ]);
 
+                    Log::info("AiSensy Customer WhatsApp Response for {$order->order_number}: " . $resCust->body());
+
                     // Send to Shop Owner
                     $shopPhone = preg_replace('/[^0-9]/', '', Setting::get('store_whatsapp', '919998887776'));
                     if (strlen($shopPhone) === 10) $shopPhone = '91' . $shopPhone;
 
-                    \Illuminate\Support\Facades\Http::post('https://backend.aisensy.com/campaign/t1/api/v2', [
+                    $resShop = \Illuminate\Support\Facades\Http::post('https://backend.aisensy.com/campaign/t1/api/v2', [
                         'apiKey' => $aisensyKey,
                         'campaignName' => $aisensyCampaign,
-                        'destination' => '+' . $shopPhone,
+                        'destination' => $shopPhone,
                         'userName' => 'Shop Owner',
                         'templateParams' => [
                             $order->order_number,
@@ -240,7 +242,7 @@ class CheckoutController extends Controller
                         ]
                     ]);
 
-                    Log::info("AiSensy WhatsApp notifications sent for order {$order->order_number}");
+                    Log::info("AiSensy Shop Owner WhatsApp Response for {$order->order_number}: " . $resShop->body());
                 }
             } catch (\Throwable $waEx) {
                 Log::error("AiSensy WhatsApp API error: " . $waEx->getMessage());
