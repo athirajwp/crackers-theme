@@ -1,3 +1,5 @@
+DirectoryIndex public/index.php index.php index.html
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
@@ -9,7 +11,17 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Direct all requests to public/ folder
+    # Redirect root to public/index.php
+    RewriteRule ^$ public/index.php [L]
+
+    # Direct requests for public assets to public/ folder
     RewriteCond %{REQUEST_URI} !^/public/
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -d
     RewriteRule ^(.*)$ public/$1 [L]
+
+    # Send missing requests to Laravel index.php in public
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ public/index.php [L]
 </IfModule>
