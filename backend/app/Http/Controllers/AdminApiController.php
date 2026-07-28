@@ -765,6 +765,28 @@ class AdminApiController extends Controller
             Setting::set('store_upi_qr', $uploadDir . '/' . $fileName, 'text');
         }
 
+        // Sync back to central Company record if available
+        $company = view()->shared('currentCompany');
+        if ($company) {
+            try {
+                $company->update([
+                    'name' => $request->store_name,
+                    'contact_1' => $request->store_phone,
+                    'contact_2' => $request->store_whatsapp,
+                    'email_1' => $request->store_email,
+                    'address' => $request->store_address,
+                    'address_1' => $request->store_address,
+                    'bank_name_1' => $request->bank_name,
+                    'bank_acc_1' => $request->bank_acc_no,
+                    'bank_ifsc_1' => $request->bank_ifsc,
+                    'bank_holder_1' => $request->bank_holder,
+                    'upi_id_1' => $request->store_upi,
+                ]);
+            } catch (\Exception $ex) {
+                Log::error('Company central sync error: ' . $ex->getMessage());
+            }
+        }
+
         return response()->json(['success' => true]);
     }
 

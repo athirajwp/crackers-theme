@@ -166,6 +166,8 @@ class AdminSysApiController extends Controller
                 '--force' => true,
             ]);
             
+            $this->syncCompanyToSettings($company);
+            
         } catch (\Exception $e) {
             $company->delete();
             try {
@@ -237,12 +239,73 @@ class AdminSysApiController extends Controller
         }
 
         $company->update($data);
+        $this->syncCompanyToSettings($company);
 
         return response()->json([
             'success' => true,
             'message' => 'Company domain record updated successfully!',
             'company' => $company
         ]);
+    }
+
+    /**
+     * Sync Company fields (Name, Contacts, Address, Bank details) to Tenant DB Settings table.
+     */
+    private function syncCompanyToSettings(Company $company)
+    {
+        try {
+            $tenantDb = 'crackers2_' . strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $company->code));
+            
+            $config = config("database.connections.central");
+            $config['database'] = $tenantDb;
+            config(["database.connections.tenant_sync" => $config]);
+
+            DB::purge('tenant_sync');
+
+            // Verify database exists
+            $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'pgsql') {
+                $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
+            } else {
+                $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
+            }
+
+            if (!empty($exists)) {
+                $address = $company->address_1 ?? ($company->address ?? '');
+                if ($company->address_2) $address .= ', ' . $company->address_2;
+                if ($company->city) $address .= ', ' . $company->city;
+                if ($company->state) $address .= ', ' . $company->state;
+                if ($company->pincode) $address .= ' - ' . $company->pincode;
+
+                $settingsMap = [
+                    'store_name' => $company->name,
+                    'store_phone' => $company->contact_1,
+                    'store_whatsapp' => $company->contact_2 ?: $company->contact_1,
+                    'store_email' => $company->email_1 ?: $company->email,
+                    'store_address' => $address,
+                    'bank_name' => $company->bank_name_1,
+                    'bank_acc_no' => $company->bank_acc_1,
+                    'bank_ifsc' => $company->bank_ifsc_1,
+                    'bank_holder' => $company->bank_holder_1,
+                    'store_upi' => $company->upi_id_1 ?? '',
+                ];
+
+                if ($company->bank_qr_1) {
+                    $settingsMap['store_upi_qr'] = $company->bank_qr_1;
+                }
+
+                foreach ($settingsMap as $key => $value) {
+                    if ($value !== null) {
+                        DB::connection('tenant_sync')->table('settings')->updateOrInsert(
+                            ['key' => $key],
+                            ['value' => $value, 'type' => 'text', 'updated_at' => now(), 'created_at' => now()]
+                        );
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Tenant settings sync error: ' . $e->getMessage());
+        }
     }
 
     /**
