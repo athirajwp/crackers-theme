@@ -119,12 +119,22 @@ export default function AdminBranding() {
     try {
       const res = await fetch('/api/admin/branding/update', {
         method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
         body: postData,
       });
 
-      const data = await res.json();
+      let data = {};
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text || `Server returned status ${res.status}`);
+      }
 
-      if (res.ok) {
+      if (res.ok && data.success) {
         Swal.fire({
           icon: 'success',
           title: 'Slot Saved!',
@@ -146,7 +156,7 @@ export default function AdminBranding() {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'An error occurred during upload.',
+        text: err.message || 'An error occurred during upload.',
       });
     } finally {
       setSavingSlots((prev) => ({ ...prev, [key]: false }));
@@ -174,12 +184,19 @@ export default function AdminBranding() {
     try {
       const res = await fetch('/api/admin/branding/update', {
         method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
         body: postData,
       });
 
-      const data = await res.json();
+      let data = {};
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await res.json();
+      }
 
-      if (res.ok) {
+      if (res.ok && data.success) {
         Swal.fire({
           icon: 'success',
           title: 'Removed!',

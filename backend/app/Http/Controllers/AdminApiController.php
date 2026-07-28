@@ -896,7 +896,7 @@ class AdminApiController extends Controller
         foreach ($imageFields as $field) {
             if ($request->hasFile($field)) {
                 $request->validate([
-                    $field => 'file|mimes:jpeg,png,jpg,webp,ico,cur,gif,svg|max:20480'
+                    $field => 'file|max:20480'
                 ]);
 
                 // Read file contents and convert to Base64
