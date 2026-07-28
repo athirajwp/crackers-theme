@@ -58,9 +58,9 @@ export default function Storefront() {
         <div className="bg-[#EFEBE8] border border-[#E2DDD9] rounded-3xl p-6 md:p-8 shadow-sm space-y-8">
 
           {/* Welcome Text & Image Block */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
             {/* Left: Text Content */}
-            <div className="md:col-span-7 space-y-4 text-center md:text-left">
+            <div className="md:col-span-6 lg:col-span-6 space-y-4 text-center md:text-left">
               <span className="inline-flex items-center gap-1.5 bg-gold-50 border border-gold-200 text-gold-800 text-[10px] font-black uppercase tracking-widest px-3.5 py-1 rounded-full shadow-sm">
                 <i className="fa-solid fa-star text-gold-600"></i> Sivakasi Direct Wholesale Shop
               </span>
@@ -70,16 +70,14 @@ export default function Storefront() {
               <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-medium">
                 We are Sivakasi's premier online fireworks ordering platform, dedicated to delivering 100% original, certified high-quality crackers directly from the manufacturing hub of Sivakasi. Choose from our extensive collection of sparkling sparklers, traditional ground chakkars, vibrant flower pots, thunderous sound crackers, multi-shot aerial repeaters, and fancy sky displays at unbeatable factory rates with <strong className="text-crimson-600 font-extrabold">Flat {settings.discount_percent}% Wholesale Discount!</strong>
               </p>
-
-
             </div>
 
             {/* Right: Diwali Kids Image */}
-            <div className="md:col-span-5 flex justify-center items-center overflow-hidden">
+            <div className="md:col-span-6 lg:col-span-6 flex justify-center items-center">
               <img
                 src={diwaliKidsHD}
                 alt="Diwali Fireworks Celebration"
-                className="w-full max-w-sm md:max-w-md lg:max-w-lg max-h-72 md:max-h-80 lg:max-h-96 object-contain drop-shadow-sm transition-transform duration-500 hover:scale-105"
+                className="w-full max-w-md md:max-w-lg lg:max-w-xl max-h-80 md:max-h-[420px] lg:max-h-[480px] xl:max-h-[520px] object-contain drop-shadow-md md:drop-shadow-xl transition-transform duration-500 hover:scale-105 scale-105 md:scale-110"
               />
             </div>
           </div>
