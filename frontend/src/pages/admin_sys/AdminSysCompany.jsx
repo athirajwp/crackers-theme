@@ -326,13 +326,13 @@ export default function AdminSysCompany() {
 
                       <td className="py-3.5 px-4 border-r border-slate-150 font-bold text-slate-800">
                         <a
-                          href={company.website.startsWith('http') ? company.website : `http://${company.website}`}
+                          href={company.website && company.website.includes('.') && !company.website.includes('localhost') ? (company.website.startsWith('http') ? company.website : `https://${company.website}`) : `/?company=${company.code}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-amber-650 hover:underline flex items-center gap-1"
+                          className="text-amber-600 hover:underline flex items-center gap-1"
                         >
                           <i className="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                          {company.website}
+                          {company.website || `?company=${company.code}`}
                         </a>
                       </td>
 
@@ -359,6 +359,16 @@ export default function AdminSysCompany() {
                       </td>
 
                       <td className="py-3.5 px-4 text-center space-x-1.5 whitespace-nowrap">
+                        {/* Open Storefront Button */}
+                        <a
+                          href={`/?company=${company.code}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 transition-colors shadow-sm"
+                          title={`Open Storefront Home (${company.name})`}
+                        >
+                          <i className="fa-solid fa-store text-xs"></i>
+                        </a>
                         {/* Client Admin Portal Button */}
                         <a
                           href={`/admin/login?company=${company.code}`}
