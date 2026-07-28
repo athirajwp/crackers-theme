@@ -152,7 +152,7 @@ export default function PriceList() {
           <div className="text-xs text-slate-500 font-semibold space-y-1">
             <div>
               <i className="fa-solid fa-phone text-crimson-600 mr-1.5 text-[10px]"></i>
-              <strong>Phone:</strong> {settings.store_phone}
+              <strong>Phone:</strong> {[settings.store_phone, settings.store_phone_2, settings.store_phone_3, settings.store_phone_4].filter(Boolean).join(', ')}
             </div>
             <div>
               <i className="fa-solid fa-envelope text-crimson-600 mr-1.5 text-[10px]"></i>

@@ -31,9 +31,30 @@ export default function Footer() {
                   <i className="fa-solid fa-location-dot text-gold-400 mt-0.5 flex-shrink-0"></i>
                   <span>{settings.store_address}</span>
                 </li>
-                <li className="flex items-center gap-2.5">
-                  <i className="fa-solid fa-phone text-gold-400 flex-shrink-0"></i>
-                  <a href={`tel:${settings.store_phone}`} className="hover:text-gold-400 transition-colors font-extrabold text-white">{settings.store_phone}</a>
+                <li className="flex items-start gap-2.5">
+                  <i className="fa-solid fa-phone text-gold-400 mt-1 flex-shrink-0"></i>
+                  <div className="flex flex-col gap-1">
+                    {settings.store_phone && (
+                      <a href={`tel:${settings.store_phone}`} className="hover:text-gold-400 transition-colors font-extrabold text-white">
+                        {settings.store_phone}
+                      </a>
+                    )}
+                    {settings.store_phone_2 && (
+                      <a href={`tel:${settings.store_phone_2}`} className="hover:text-gold-400 transition-colors font-extrabold text-white">
+                        {settings.store_phone_2}
+                      </a>
+                    )}
+                    {settings.store_phone_3 && (
+                      <a href={`tel:${settings.store_phone_3}`} className="hover:text-gold-400 transition-colors font-extrabold text-white">
+                        {settings.store_phone_3}
+                      </a>
+                    )}
+                    {settings.store_phone_4 && (
+                      <a href={`tel:${settings.store_phone_4}`} className="hover:text-gold-400 transition-colors font-extrabold text-white">
+                        {settings.store_phone_4}
+                      </a>
+                    )}
+                  </div>
                 </li>
                 <li className="flex items-center gap-2.5">
                   <i className="fa-solid fa-envelope text-gold-400 flex-shrink-0"></i>
