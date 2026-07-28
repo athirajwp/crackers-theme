@@ -139,6 +139,9 @@ Route::prefix('api/admin')->group(function () {
         Route::get('/branding', [AdminApiController::class, 'branding']);
         Route::post('/branding/update', [AdminApiController::class, 'updateBranding']);
         
+        Route::get('/reports/sales', [AdminApiController::class, 'reportsSales']);
+        Route::get('/customers', [AdminApiController::class, 'customers']);
+        
         Route::post('/profile/update', [AdminApiController::class, 'updateProfile']);
     });
 });

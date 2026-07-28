@@ -121,6 +121,20 @@ export default function AdminDashboard() {
             <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Quick shortcuts</h3>
             <div className="grid grid-cols-2 gap-3 text-xs font-extrabold select-none">
               <Link
+                to="/admin/reports"
+                className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-xl gap-2 transition-all"
+              >
+                <i className="fa-solid fa-chart-line text-base text-emerald-600"></i>
+                <span>Sales Reports</span>
+              </Link>
+              <Link
+                to="/admin/customers"
+                className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-xl gap-2 transition-all"
+              >
+                <i className="fa-solid fa-users text-base text-blue-600"></i>
+                <span>Customers</span>
+              </Link>
+              <Link
                 to="/admin/products"
                 className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-xl gap-2 transition-all"
               >
@@ -131,21 +145,21 @@ export default function AdminDashboard() {
                 to="/admin/categories"
                 className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-xl gap-2 transition-all"
               >
-                <i className="fa-solid fa-tags text-base text-blue-600"></i>
+                <i className="fa-solid fa-tags text-base text-amber-600"></i>
                 <span>Categories ({stats.total_categories})</span>
               </Link>
               <Link
                 to="/admin/settings"
-                className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-xl gap-2 transition-all animate-pulse"
+                className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-xl gap-2 transition-all"
               >
-                <i className="fa-solid fa-sliders text-base text-emerald-600"></i>
+                <i className="fa-solid fa-sliders text-base text-purple-600"></i>
                 <span>Settings</span>
               </Link>
               <Link
                 to="/admin/branding"
                 className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 rounded-xl gap-2 transition-all"
               >
-                <i className="fa-solid fa-palette text-base text-purple-600"></i>
+                <i className="fa-solid fa-palette text-base text-pink-600"></i>
                 <span>Branding</span>
               </Link>
             </div>

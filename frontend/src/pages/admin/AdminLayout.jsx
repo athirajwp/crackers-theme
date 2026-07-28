@@ -44,6 +44,8 @@ export default function AdminLayout({ children }) {
 
   const menuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: 'fa-gauge' },
+    { path: '/admin/reports', label: 'Sales Reports', icon: 'fa-chart-line' },
+    { path: '/admin/customers', label: 'Customers', icon: 'fa-users' },
     { path: '/admin/orders', label: 'Orders', icon: 'fa-cart-shopping' },
     { path: '/admin/products', label: 'Products', icon: 'fa-box-open' },
     { path: '/admin/categories', label: 'Categories', icon: 'fa-tags' },

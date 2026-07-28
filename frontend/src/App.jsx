@@ -23,6 +23,8 @@ import AdminOrderEditItems from './pages/admin/AdminOrderEditItems';
 import AdminInvoice from './pages/admin/AdminInvoice';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminBranding from './pages/admin/AdminBranding';
+import AdminReports from './pages/admin/AdminReports';
+import AdminCustomers from './pages/admin/AdminCustomers';
 import AdminProfile from './pages/admin/AdminProfile';
 
 // Super Admin (admin_sys) React imports
@@ -239,6 +241,8 @@ function App() {
 
           {/* Protected Admin Console Pages */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/customers" element={<AdminCustomers />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/orders/:id" element={<AdminOrderDetails />} />
           <Route path="/admin/orders/:id/edit-items" element={<AdminOrderEditItems />} />

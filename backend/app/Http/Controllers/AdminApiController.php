@@ -913,4 +913,247 @@ class AdminApiController extends Controller
         Setting::set('admin_password', Hash::make($request->password), 'text');
         return response()->json(['success' => true]);
     }
+
+    /**
+     * Sales Reports API (Specific Day, Daily, Monthly, Yearly).
+     */
+    public function reportsSales(Request $request)
+    {
+        $period = $request->query('period', 'monthly'); // 'specific_date', 'daily', 'monthly', 'yearly'
+        $reqDate = $request->query('date'); // 'YYYY-MM-DD'
+        $reqYear = $request->query('year');
+        $reqMonth = $request->query('month');
+        $status = $request->query('status', 'all'); // 'all', 'paid', 'pending'
+
+        // 1. Get available years in DB
+        $availableYears = Order::select(DB::raw('YEAR(created_at) as yr'))
+            ->whereNotNull('created_at')
+            ->distinct()
+            ->orderBy('yr', 'desc')
+            ->pluck('yr')
+            ->filter()
+            ->map(fn($y) => (int)$y)
+            ->values()
+            ->toArray();
+
+        if (empty($availableYears)) {
+            $availableYears = [(int)date('Y')];
+        }
+
+        // Determine active year filter
+        $year = null;
+        if ($reqYear === 'all') {
+            $year = 'all';
+        } elseif ($reqYear && in_array((int)$reqYear, $availableYears)) {
+            $year = (int)$reqYear;
+        } else {
+            // Default to most recent year with orders
+            $year = reset($availableYears);
+        }
+
+        // Determine active month filter
+        $month = $reqMonth ? (int)$reqMonth : (int)date('m');
+
+        // 2. Fetch Base Orders
+        $ordersQuery = Order::query()->with('items');
+        if ($status === 'paid') {
+            $ordersQuery->where('payment_status', 'paid');
+        } elseif ($status === 'pending') {
+            $ordersQuery->where('payment_status', 'pending');
+        }
+
+        if ($period === 'specific_date' && !empty($reqDate)) {
+            $ordersQuery->whereDate('created_at', $reqDate);
+        } elseif ($period === 'daily') {
+            if ($year !== 'all') {
+                $ordersQuery->whereYear('created_at', $year);
+            }
+            if ($month) {
+                $ordersQuery->whereMonth('created_at', $month);
+            }
+        } elseif ($period === 'monthly') {
+            if ($year !== 'all') {
+                $ordersQuery->whereYear('created_at', $year);
+            }
+        }
+
+        $orders = $ordersQuery->orderBy('created_at', 'asc')->get();
+
+        // 3. Process Breakdown Grouping in PHP for 100% database compatibility
+        $grouped = [];
+
+        foreach ($orders as $o) {
+            if (!$o->created_at) continue;
+
+            if ($period === 'specific_date') {
+                $key = $o->created_at->format('Y-m-d H:00');
+                $label = $o->created_at->format('h:00 A');
+            } elseif ($period === 'daily') {
+                $key = $o->created_at->format('Y-m-d');
+                $label = $o->created_at->format('d M Y (D)');
+            } elseif ($period === 'yearly') {
+                $key = $o->created_at->format('Y');
+                $label = 'Year ' . $o->created_at->format('Y');
+            } else {
+                // monthly
+                $key = $o->created_at->format('Y-m');
+                $label = $o->created_at->format('F Y');
+            }
+
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'label' => $label,
+                    'raw_key' => $key,
+                    'total_orders' => 0,
+                    'total_revenue' => 0.0,
+                    'verified_revenue' => 0.0,
+                    'pending_revenue' => 0.0,
+                ];
+            }
+
+            $amount = (float)$o->net_amount;
+            $grouped[$key]['total_orders'] += 1;
+            $grouped[$key]['total_revenue'] += $amount;
+            if ($o->payment_status === 'paid') {
+                $grouped[$key]['verified_revenue'] += $amount;
+            } else {
+                $grouped[$key]['pending_revenue'] += $amount;
+            }
+        }
+
+        $breakdown = array_values($grouped);
+
+        // 4. Compute Overall Summary
+        $totalOrdersCount = count($orders);
+        $totalRev = $orders->sum('net_amount');
+        $verifiedRev = $orders->where('payment_status', 'paid')->sum('net_amount');
+        $pendingRev = $orders->where('payment_status', 'pending')->sum('net_amount');
+
+        $summary = [
+            'total_orders' => $totalOrdersCount,
+            'total_revenue' => (float)$totalRev,
+            'verified_revenue' => (float)$verifiedRev,
+            'pending_revenue' => (float)$pendingRev,
+            'avg_order_value' => $totalOrdersCount > 0 ? round((float)$totalRev / $totalOrdersCount, 2) : 0,
+        ];
+
+        // 5. Compute Top Products
+        $productSales = [];
+        foreach ($orders as $o) {
+            foreach ($o->items as $item) {
+                $pName = $item->product_name ?: 'Unnamed Product';
+                if (!isset($productSales[$pName])) {
+                    $productSales[$pName] = [
+                        'product_name' => $pName,
+                        'total_qty' => 0,
+                        'total_sales' => 0.0,
+                    ];
+                }
+                $productSales[$pName]['total_qty'] += (int)$item->qty;
+                $productSales[$pName]['total_sales'] += (float)$item->total_price;
+            }
+        }
+
+        usort($productSales, fn($a, $b) => $b['total_sales'] <=> $a['total_sales']);
+        $topProducts = array_slice($productSales, 0, 5);
+
+        return response()->json([
+            'period' => $period,
+            'date' => $reqDate,
+            'year' => $year,
+            'month' => $month,
+            'summary' => $summary,
+            'breakdown' => $breakdown,
+            'top_products' => $topProducts,
+            'available_years' => $availableYears,
+            'orders' => $orders->map(function ($o) {
+                return [
+                    'id' => $o->id,
+                    'order_number' => $o->order_number,
+                    'name' => $o->name,
+                    'phone' => $o->phone,
+                    'net_amount' => (float)$o->net_amount,
+                    'payment_status' => $o->payment_status,
+                    'order_status' => $o->order_status,
+                    'created_at' => $o->created_at ? $o->created_at->format('d M Y, h:i A') : '',
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Customer Directory & Order History Insights.
+     */
+    public function customers(Request $request)
+    {
+        $search = trim($request->query('search', ''));
+
+        $orders = Order::orderBy('created_at', 'desc')->get();
+
+        $grouped = [];
+        foreach ($orders as $o) {
+            $phoneKey = trim($o->phone ?: ($o->email ?: ('id_' . $o->id)));
+            
+            if (!isset($grouped[$phoneKey])) {
+                $grouped[$phoneKey] = [
+                    'customer_key' => $phoneKey,
+                    'name' => $o->name,
+                    'phone' => $o->phone,
+                    'email' => $o->email,
+                    'city' => $o->city ?: ($o->town ?: 'N/A'),
+                    'district' => $o->district,
+                    'state' => $o->state,
+                    'address' => $o->address,
+                    'total_orders' => 0,
+                    'total_spent' => 0,
+                    'verified_spent' => 0,
+                    'last_order_date' => $o->created_at ? $o->created_at->format('Y-m-d H:i') : 'N/A',
+                    'last_order_number' => $o->order_number,
+                    'orders' => [],
+                ];
+            }
+
+            $grouped[$phoneKey]['total_orders'] += 1;
+            $grouped[$phoneKey]['total_spent'] += (float)$o->net_amount;
+            if ($o->payment_status === 'paid') {
+                $grouped[$phoneKey]['verified_spent'] += (float)$o->net_amount;
+            }
+
+            $grouped[$phoneKey]['orders'][] = [
+                'id' => $o->id,
+                'order_number' => $o->order_number,
+                'created_at' => $o->created_at ? $o->created_at->format('d M Y, h:i A') : 'N/A',
+                'net_amount' => (float)$o->net_amount,
+                'order_status' => $o->order_status,
+                'payment_status' => $o->payment_status,
+            ];
+        }
+
+        $customersList = array_values($grouped);
+
+        if (!empty($search)) {
+            $searchLower = mb_strtolower($search);
+            $customersList = array_filter($customersList, function ($cust) use ($searchLower) {
+                return str_contains(mb_strtolower($cust['name'] ?? ''), $searchLower) ||
+                       str_contains(mb_strtolower($cust['phone'] ?? ''), $searchLower) ||
+                       str_contains(mb_strtolower($cust['email'] ?? ''), $searchLower) ||
+                       str_contains(mb_strtolower($cust['city'] ?? ''), $searchLower);
+            });
+            $customersList = array_values($customersList);
+        }
+
+        $totalCustomers = count($grouped);
+        $repeatCustomers = count(array_filter($grouped, fn($c) => $c['total_orders'] > 1));
+        $totalCustomerSpent = array_sum(array_column($grouped, 'total_spent'));
+
+        return response()->json([
+            'customers' => $customersList,
+            'metrics' => [
+                'total_customers' => $totalCustomers,
+                'repeat_customers' => $repeatCustomers,
+                'total_lifetime_spent' => $totalCustomerSpent,
+                'avg_spent_per_customer' => $totalCustomers > 0 ? round($totalCustomerSpent / $totalCustomers, 2) : 0,
+            ],
+        ]);
+    }
 }
