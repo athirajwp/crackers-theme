@@ -1,0 +1,27 @@
+DirectoryIndex backend/public/index.php index.php index.html
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect root to backend/public/index.php
+    RewriteRule ^$ backend/public/index.php [L]
+
+    # Direct requests for backend public assets to backend/public/ folder
+    RewriteCond %{REQUEST_URI} !^/backend/public/
+    RewriteCond %{DOCUMENT_ROOT}/backend/public/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/backend/public/$1 -d
+    RewriteRule ^(.*)$ backend/public/$1 [L]
+
+    # Route missing paths (e.g. /admin_sys/company) to backend/public/index.php
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ backend/public/index.php [L]
+</IfModule>

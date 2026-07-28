@@ -1,8 +1,8 @@
 <?php
 
-// Normalize SCRIPT_NAME on Hostinger/shared hosts when requests are rewritten into /public/
-if (isset($_SERVER['SCRIPT_NAME']) && str_starts_with($_SERVER['SCRIPT_NAME'], '/public/')) {
-    $_SERVER['SCRIPT_NAME'] = preg_replace('/^\/public/', '', $_SERVER['SCRIPT_NAME']);
+// Normalize SCRIPT_NAME on Hostinger/shared hosts when requests are rewritten into /backend/public/ or /public/
+if (isset($_SERVER['SCRIPT_NAME']) && (str_starts_with($_SERVER['SCRIPT_NAME'], '/backend/public/') || str_starts_with($_SERVER['SCRIPT_NAME'], '/public/'))) {
+    $_SERVER['SCRIPT_NAME'] = preg_replace('/^\/(backend\/public|public)/', '', $_SERVER['SCRIPT_NAME']);
 }
 
 if (strpos($_SERVER['REQUEST_URI'] ?? '', 'admin_sys/login') !== false) {
