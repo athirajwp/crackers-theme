@@ -58,9 +58,14 @@ export const StoreProvider = ({ children }) => {
             const faviconUrl = data.settings.store_favicon.startsWith('data:') || data.settings.store_favicon.startsWith('http') 
               ? data.settings.store_favicon 
               : `/${data.settings.store_favicon}`;
-            const link = document.querySelector("link[rel~='icon']");
-            if (link) {
+            const links = document.querySelectorAll("link[rel*='icon']");
+            if (links.length > 0) {
+              links.forEach((l) => (l.href = faviconUrl));
+            } else {
+              const link = document.createElement('link');
+              link.rel = 'icon';
               link.href = faviconUrl;
+              document.head.appendChild(link);
             }
           }
         }

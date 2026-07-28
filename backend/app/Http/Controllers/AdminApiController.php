@@ -896,13 +896,17 @@ class AdminApiController extends Controller
         foreach ($imageFields as $field) {
             if ($request->hasFile($field)) {
                 $request->validate([
-                    $field => 'image|mimes:jpeg,png,jpg,webp|max:20480'
+                    $field => 'file|mimes:jpeg,png,jpg,webp,ico,cur,gif,svg|max:20480'
                 ]);
 
                 // Read file contents and convert to Base64
                 $file = $request->file($field);
                 $fileData = file_get_contents($file->getRealPath());
-                $base64 = 'data:' . $file->getMimeType() . ';base64,' . base64_encode($fileData);
+                $mimeType = $file->getMimeType();
+                if ($mimeType === 'application/octet-stream' || str_ends_with(strtolower($file->getClientOriginalName()), '.ico')) {
+                    $mimeType = 'image/x-icon';
+                }
+                $base64 = 'data:' . $mimeType . ';base64,' . base64_encode($fileData);
 
                 // Clean up old file from disk if it was a legacy file
                 $oldPath = Setting::get($field);
@@ -911,6 +915,14 @@ class AdminApiController extends Controller
                 }
 
                 Setting::set($field, $base64, 'text');
+
+                if ($company) {
+                    if ($field === 'store_logo') {
+                        $company->update(['logo_path' => $base64]);
+                    } elseif ($field === 'store_favicon') {
+                        $company->update(['favicon_path' => $base64]);
+                    }
+                }
             }
         }
 
