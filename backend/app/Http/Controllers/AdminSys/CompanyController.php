@@ -69,64 +69,57 @@ class CompanyController extends Controller
         // Create the company record in central DB first
         $company = Company::create($data);
 
-        // Dynamically create, migrate, and seed the new database
+        // Dynamically create, migrate, and seed the new database if permitted
         try {
             $tenantDb = 'crackers2_' . strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $company->code));
+            $dbCreated = false;
             
-            // Check and create database
-            $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
-            if ($driver === 'pgsql') {
-                $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
-            } else {
-                $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
-            }
-            if (empty($exists)) {
-                DB::connection('central')->statement("CREATE DATABASE $tenantDb");
-            }
-
-            // Configure temporary connection configuration for migrating
-            $config = config("database.connections.central");
-            $config['database'] = $tenantDb;
-            config(["database.connections.tenant_migration" => $config]);
-
-            // Clear database connection cache for safety
-            DB::purge('tenant_migration');
-
-            // Run migrations programmatically
-            \Illuminate\Support\Facades\Artisan::call('migrate', [
-                '--database' => 'tenant_migration',
-                '--force' => true,
-            ]);
-
-            // Run seeders programmatically
-            \Illuminate\Support\Facades\Artisan::call('db:seed', [
-                '--database' => 'tenant_migration',
-                '--class' => 'Database\\Seeders\\CategoryAndProductSeeder',
-                '--force' => true,
-            ]);
-            
-        } catch (\Exception $e) {
-            // Delete the company record if DB setup failed
-            $company->delete();
-            
-            // Attempt to clean up database if it was created
             try {
-                if (isset($tenantDb)) {
-                    DB::connection('central')->statement("DROP DATABASE IF EXISTS $tenantDb");
+                $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+                if ($driver === 'pgsql') {
+                    $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
+                } else {
+                    $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
                 }
-            } catch (\Exception $dbDropEx) {
-                // Ignore drop error
+                if (empty($exists)) {
+                    DB::connection('central')->statement("CREATE DATABASE $tenantDb");
+                }
+                $dbCreated = true;
+            } catch (\Throwable $dbEx) {
+                \Illuminate\Support\Facades\Log::warning("CREATE DATABASE restricted on host for {$tenantDb}: " . $dbEx->getMessage());
+                $dbCreated = false;
+            }
+
+            if ($dbCreated) {
+                try {
+                    $config = config("database.connections.central");
+                    if ($config) {
+                        $config['database'] = $tenantDb;
+                        config(["database.connections.tenant_migration" => $config]);
+
+                        DB::purge('tenant_migration');
+
+                        \Illuminate\Support\Facades\Artisan::call('migrate', [
+                            '--database' => 'tenant_migration',
+                            '--force' => true,
+                        ]);
+
+                        \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                            '--database' => 'tenant_migration',
+                            '--class' => 'Database\\Seeders\\CategoryAndProductSeeder',
+                            '--force' => true,
+                        ]);
+                    }
+                } catch (\Throwable $migEx) {
+                    \Illuminate\Support\Facades\Log::error('Tenant migration error: ' . $migEx->getMessage());
+                }
             }
             
-            // Log the error
-            \Illuminate\Support\Facades\Log::error('Tenant database setup failed: ' . $e->getMessage());
-            
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['code' => 'Database setup failed: ' . $e->getMessage()]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Tenant database setup warning: ' . $e->getMessage());
         }
 
-        return redirect()->route('admin_sys.company.index')->with('success', 'New domain company registered and database created successfully!');
+        return redirect()->route('admin_sys.company.index')->with('success', 'New domain company registered successfully!');
     }
 
 

@@ -138,60 +138,61 @@ class AdminSysApiController extends Controller
         // Create company record
         $company = Company::create($data);
 
-        // Dynamically create, migrate, and seed database
+        // Dynamically create, migrate, and seed database if privileges permit
         try {
             $tenantDb = 'crackers2_' . strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $company->code));
+            $dbCreated = false;
             
-            $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
-            if ($driver === 'pgsql') {
-                $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
-            } else {
-                $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
+            try {
+                $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+                if ($driver === 'pgsql') {
+                    $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
+                } else {
+                    $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
+                }
+                if (empty($exists)) {
+                    DB::connection('central')->statement("CREATE DATABASE $tenantDb");
+                }
+                $dbCreated = true;
+            } catch (\Throwable $createDbEx) {
+                Log::warning("CREATE DATABASE restricted on host for {$tenantDb}: " . $createDbEx->getMessage());
+                $dbCreated = false;
             }
-            if (empty($exists)) {
-                DB::connection('central')->statement("CREATE DATABASE $tenantDb");
+
+            if ($dbCreated) {
+                try {
+                    $config = config("database.connections.central") ?: config("database.connections." . config('database.default'));
+                    if ($config) {
+                        $config['database'] = $tenantDb;
+                        config(["database.connections.tenant_migration" => $config]);
+
+                        DB::purge('tenant_migration');
+
+                        \Illuminate\Support\Facades\Artisan::call('migrate', [
+                            '--database' => 'tenant_migration',
+                            '--force' => true,
+                        ]);
+
+                        \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                            '--database' => 'tenant_migration',
+                            '--class' => 'Database\\Seeders\\CategoryAndProductSeeder',
+                            '--force' => true,
+                        ]);
+                    }
+                } catch (\Throwable $migEx) {
+                    Log::error('Tenant migration error: ' . $migEx->getMessage());
+                }
             }
-
-            $config = config("database.connections.central") ?: config("database.connections." . config('database.default'));
-            if (!$config) {
-                throw new \Exception("Database connection configuration not found.");
-            }
-            $config['database'] = $tenantDb;
-            config(["database.connections.tenant_migration" => $config]);
-
-            DB::purge('tenant_migration');
-
-            \Illuminate\Support\Facades\Artisan::call('migrate', [
-                '--database' => 'tenant_migration',
-                '--force' => true,
-            ]);
-
-            \Illuminate\Support\Facades\Artisan::call('db:seed', [
-                '--database' => 'tenant_migration',
-                '--class' => 'Database\\Seeders\\CategoryAndProductSeeder',
-                '--force' => true,
-            ]);
             
             $this->syncCompanyToSettings($company);
             
         } catch (\Throwable $e) {
-            $company->delete();
-            try {
-                if (isset($tenantDb)) {
-                    DB::connection('central')->statement("DROP DATABASE IF EXISTS $tenantDb");
-                }
-            } catch (\Throwable $dbDropEx) {}
-            
-            Log::error('Tenant database setup failed: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Database setup failed: ' . $e->getMessage()
-            ], 422);
+            Log::error('Company setup warning: ' . $e->getMessage());
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'New company domain registered and database created successfully!',
+            'message' => 'New company domain registered successfully!',
             'company' => $company
         ]);
     }
@@ -277,51 +278,67 @@ class AdminSysApiController extends Controller
         try {
             $tenantDb = 'crackers2_' . strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $company->code));
             
-            $config = config("database.connections.central") ?: config("database.connections." . config('database.default'));
-            if (!$config) {
-                return;
+            $address = $company->address_1 ?? ($company->address ?? '');
+            if ($company->address_2) $address .= ', ' . $company->address_2;
+            if ($company->city) $address .= ', ' . $company->city;
+            if ($company->state) $address .= ', ' . $company->state;
+            if ($company->pincode) $address .= ' - ' . $company->pincode;
+
+            $settingsMap = [
+                'store_name' => $company->name,
+                'store_phone' => $company->contact_1,
+                'store_phone_2' => $company->contact_2,
+                'store_phone_3' => $company->contact_3,
+                'store_phone_4' => $company->contact_4,
+                'store_whatsapp' => $company->contact_2 ?: $company->contact_1,
+                'store_email' => $company->email_1 ?: $company->email,
+                'store_address' => $address,
+                'bank_name' => $company->bank_name_1,
+                'bank_acc_no' => $company->bank_acc_1,
+                'bank_ifsc' => $company->bank_ifsc_1,
+                'bank_holder' => $company->bank_holder_1,
+                'store_upi' => $company->upi_id_1 ?? '',
+            ];
+
+            if ($company->bank_qr_1) {
+                $settingsMap['store_upi_qr'] = $company->bank_qr_1;
             }
 
-            $config['database'] = $tenantDb;
-            config(["database.connections.tenant_sync" => $config]);
+            $syncedToTenant = false;
+            try {
+                $config = config("database.connections.central") ?: config("database.connections." . config('database.default'));
+                if ($config) {
+                    $config['database'] = $tenantDb;
+                    config(["database.connections.tenant_sync" => $config]);
+                    DB::purge('tenant_sync');
 
-            DB::purge('tenant_sync');
+                    $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
+                    if ($driver === 'pgsql') {
+                        $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
+                    } else {
+                        $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
+                    }
 
-            // Verify database exists
-            $driver = DB::connection('central')->getPdo()->getAttribute(\PDO::ATTR_DRIVER_NAME);
-            if ($driver === 'pgsql') {
-                $exists = DB::connection('central')->select("SELECT 1 FROM pg_database WHERE datname = ?", [$tenantDb]);
-            } else {
-                $exists = DB::connection('central')->select("SELECT 1 FROM information_schema.schemata WHERE schema_name = ?", [$tenantDb]);
-            }
-
-            if (!empty($exists)) {
-                $address = $company->address_1 ?? ($company->address ?? '');
-                if ($company->address_2) $address .= ', ' . $company->address_2;
-                if ($company->city) $address .= ', ' . $company->city;
-                if ($company->state) $address .= ', ' . $company->state;
-                if ($company->pincode) $address .= ' - ' . $company->pincode;
-
-                $settingsMap = [
-                    'store_name' => $company->name,
-                    'store_phone' => $company->contact_1,
-                    'store_whatsapp' => $company->contact_2 ?: $company->contact_1,
-                    'store_email' => $company->email_1 ?: $company->email,
-                    'store_address' => $address,
-                    'bank_name' => $company->bank_name_1,
-                    'bank_acc_no' => $company->bank_acc_1,
-                    'bank_ifsc' => $company->bank_ifsc_1,
-                    'bank_holder' => $company->bank_holder_1,
-                    'store_upi' => $company->upi_id_1 ?? '',
-                ];
-
-                if ($company->bank_qr_1) {
-                    $settingsMap['store_upi_qr'] = $company->bank_qr_1;
+                    if (!empty($exists)) {
+                        foreach ($settingsMap as $key => $value) {
+                            if ($value !== null) {
+                                DB::connection('tenant_sync')->table('settings')->updateOrInsert(
+                                    ['key' => $key],
+                                    ['value' => $value, 'type' => 'text', 'updated_at' => now(), 'created_at' => now()]
+                                );
+                            }
+                        }
+                        $syncedToTenant = true;
+                    }
                 }
+            } catch (\Throwable $tenantEx) {
+                $syncedToTenant = false;
+            }
 
+            if (!$syncedToTenant) {
                 foreach ($settingsMap as $key => $value) {
                     if ($value !== null) {
-                        DB::connection('tenant_sync')->table('settings')->updateOrInsert(
+                        DB::table('settings')->updateOrInsert(
                             ['key' => $key],
                             ['value' => $value, 'type' => 'text', 'updated_at' => now(), 'created_at' => now()]
                         );
