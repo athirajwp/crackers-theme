@@ -171,28 +171,38 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Send order invoice email to admin and customer in the background
+            // Send order invoice email to admin and customer
             try {
                 $orderId = $order->id;
                 $tenantDb = config('database.connections.' . config('database.default') . '.database');
                 
-                $artisanPath = base_path('artisan');
-                $phpPath = (new \Symfony\Component\Process\PhpExecutableFinder())->find(false);
+                $disabledFunctions = explode(',', ini_get('disable_functions'));
+                $disabledFunctions = array_map('trim', $disabledFunctions);
                 
-                if (empty($phpPath) || str_contains($phpPath, 'cgi') || str_contains($phpPath, 'fpm') || str_contains($phpPath, 'apache')) {
-                    $phpPath = 'php';
-                }
+                $canExec = function_exists('exec') && !in_array('exec', $disabledFunctions);
+                $canPopen = function_exists('popen') && !in_array('popen', $disabledFunctions);
 
-                if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
-                    $cmd = 'start /B "" ' . escapeshellarg($phpPath) . ' ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb);
-                    pclose(popen($cmd, 'r'));
-                } else {
+                if (strncasecmp(PHP_OS, 'WIN', 3) === 0 && $canPopen) {
+                    $artisanPath = base_path('artisan');
+                    $cmd = 'start /B "" php ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb);
+                    @pclose(@popen($cmd, 'r'));
+                } elseif ($canExec) {
+                    $artisanPath = base_path('artisan');
                     $logPath = storage_path('logs/email_background.log');
-                    $cmd = 'nohup ' . escapeshellarg($phpPath) . ' ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb) . ' > ' . escapeshellarg($logPath) . ' 2>&1 &';
-                    exec($cmd);
+                    $cmd = 'nohup php ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb) . ' > ' . escapeshellarg($logPath) . ' 2>&1 &';
+                    @exec($cmd);
+                } else {
+                    try {
+                        \Illuminate\Support\Facades\Artisan::call('order:send-email', [
+                            'order_id' => $orderId,
+                            '--tenant-db' => $tenantDb,
+                        ]);
+                    } catch (\Throwable $syncEx) {
+                        Log::warning('Synchronous order email dispatch warning: ' . $syncEx->getMessage());
+                    }
                 }
-            } catch (\Exception $e) {
-                Log::error('Failed to send order email in background: ' . $e->getMessage());
+            } catch (\Throwable $e) {
+                Log::error('Failed to send order email: ' . $e->getMessage());
             }
 
             return response()->json([
@@ -200,10 +210,12 @@ class CheckoutController extends Controller
                 'redirect' => route('checkout.success', ['order_number' => $order->order_number])
             ]);
 
-        } catch (\Exception $exception) {
-            DB::rollBack();
+        } catch (\Throwable $exception) {
+            try {
+                DB::rollBack();
+            } catch (\Throwable $rbEx) {}
             Log::error('Order placement failed: ' . $exception->getMessage());
-            return response()->json(['error' => 'Something went wrong! Please try again.'], 500);
+            return response()->json(['error' => 'Order placement failed: ' . $exception->getMessage()], 500);
         }
     }
 

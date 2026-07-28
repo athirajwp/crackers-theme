@@ -71,24 +71,31 @@ export default function CheckoutDrawer({ isOpen, onClose }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify(payload),
     })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((errData) => {
-            throw new Error(errData.error || 'Failed to place order.');
-          });
+      .then(async (res) => {
+        const contentType = res.headers.get('content-type');
+        let data = {};
+        if (contentType && contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error(text || `Server error (${res.status})`);
         }
-        return res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || data.message || 'Failed to place order.');
+        }
+
+        return data;
       })
       .then((data) => {
         setSubmitting(false);
         if (data.success) {
           // Clear cart
           clearCart();
-          // Extract order number from redirect URL or similar
-          // Redirect URL format: http://127.0.0.1:8000/checkout/success/ORD-XXXXX
           const urlParts = data.redirect.split('/');
           const orderNumber = urlParts[urlParts.length - 1];
 
