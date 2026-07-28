@@ -65,11 +65,33 @@ export default function Contact() {
                 </div>
                 <div className="space-y-1">
                   <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Phone Numbers</h4>
-                  <p className="text-xs md:text-sm text-slate-500 font-semibold leading-relaxed">
-                    <a href={`tel:${settings.store_phone}`} className="hover:text-gold-600 transition-colors block">
-                      {settings.store_phone || '+91 9998887776'}
-                    </a>
-                  </p>
+                  <div className="text-xs md:text-sm text-slate-500 font-semibold leading-relaxed space-y-1">
+                    {settings.store_phone && (
+                      <a href={`tel:${settings.store_phone}`} className="hover:text-gold-600 transition-colors block">
+                        {settings.store_phone}
+                      </a>
+                    )}
+                    {settings.store_phone_2 && (
+                      <a href={`tel:${settings.store_phone_2}`} className="hover:text-gold-600 transition-colors block">
+                        {settings.store_phone_2}
+                      </a>
+                    )}
+                    {settings.store_phone_3 && (
+                      <a href={`tel:${settings.store_phone_3}`} className="hover:text-gold-600 transition-colors block">
+                        {settings.store_phone_3}
+                      </a>
+                    )}
+                    {settings.store_phone_4 && (
+                      <a href={`tel:${settings.store_phone_4}`} className="hover:text-gold-600 transition-colors block">
+                        {settings.store_phone_4}
+                      </a>
+                    )}
+                    {!settings.store_phone && !settings.store_phone_2 && !settings.store_phone_3 && !settings.store_phone_4 && (
+                      <a href="tel:+919998887776" className="hover:text-gold-600 transition-colors block">
+                        +91 9998887776
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
 

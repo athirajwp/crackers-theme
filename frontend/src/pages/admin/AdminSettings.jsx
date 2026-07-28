@@ -14,6 +14,9 @@ export default function AdminSettings() {
     discount_percent: 60,
     store_whatsapp: '',
     store_phone: '',
+    store_phone_2: '',
+    store_phone_3: '',
+    store_phone_4: '',
     store_email: '',
     store_address: '',
     store_upi: '',
@@ -167,10 +170,10 @@ export default function AdminSettings() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
-                      Support Phone
+                      Phone Contact 1 (Primary)
                     </label>
                     <input
                       type="text"
@@ -178,22 +181,64 @@ export default function AdminSettings() {
                       name="store_phone"
                       value={formData.store_phone}
                       onChange={handleChange}
+                      placeholder="+91 9998887776"
                       className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
-                      WhatsApp Coordinator
+                      Phone Contact 2
                     </label>
                     <input
                       type="text"
-                      required
-                      name="store_whatsapp"
-                      value={formData.store_whatsapp}
+                      name="store_phone_2"
+                      value={formData.store_phone_2 || ''}
                       onChange={handleChange}
+                      placeholder="+91 9998887775"
                       className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none transition-all"
                     />
                   </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                      Phone Contact 3
+                    </label>
+                    <input
+                      type="text"
+                      name="store_phone_3"
+                      value={formData.store_phone_3 || ''}
+                      onChange={handleChange}
+                      placeholder="+91 9998887774"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none transition-all"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                      Phone Contact 4
+                    </label>
+                    <input
+                      type="text"
+                      name="store_phone_4"
+                      value={formData.store_phone_4 || ''}
+                      onChange={handleChange}
+                      placeholder="+91 9998887773"
+                      className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                    WhatsApp Coordinator Phone
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    name="store_whatsapp"
+                    value={formData.store_whatsapp}
+                    onChange={handleChange}
+                    placeholder="919998887776"
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-crimson-400 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none transition-all"
+                  />
                 </div>
 
                 <div className="space-y-1.5">

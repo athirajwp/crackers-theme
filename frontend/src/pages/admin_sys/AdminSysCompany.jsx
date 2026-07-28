@@ -18,6 +18,7 @@ export default function AdminSysCompany() {
     contact_1: '',
     contact_2: '',
     contact_3: '',
+    contact_4: '',
     address: '',
     gst_no: '',
     pan_no: '',
@@ -452,7 +453,7 @@ export default function AdminSysCompany() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="font-extrabold text-slate-700 block">Primary Contact Phone</label>
+                  <label className="font-extrabold text-slate-700 block">Phone Contact 1 (Primary)</label>
                   <input
                     type="text"
                     name="contact_1"
@@ -460,6 +461,42 @@ export default function AdminSysCompany() {
                     value={formData.contact_1}
                     onChange={handleChange}
                     placeholder="+91 9998887776"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-extrabold text-slate-700 block">Phone Contact 2</label>
+                  <input
+                    type="text"
+                    name="contact_2"
+                    value={formData.contact_2 || ''}
+                    onChange={handleChange}
+                    placeholder="+91 9998887775"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-extrabold text-slate-700 block">Phone Contact 3</label>
+                  <input
+                    type="text"
+                    name="contact_3"
+                    value={formData.contact_3 || ''}
+                    onChange={handleChange}
+                    placeholder="+91 9998887774"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-extrabold text-slate-700 block">Phone Contact 4</label>
+                  <input
+                    type="text"
+                    name="contact_4"
+                    value={formData.contact_4 || ''}
+                    onChange={handleChange}
+                    placeholder="+91 9998887773"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 font-bold text-slate-800 outline-none focus:border-amber-500"
                   />
                 </div>

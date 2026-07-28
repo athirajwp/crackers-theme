@@ -707,6 +707,9 @@ class AdminApiController extends Controller
             'discount_percent' => 'required|numeric|min:0|max:100',
             'store_whatsapp' => 'required|string|max:20',
             'store_phone' => 'required|string|max:20',
+            'store_phone_2' => 'nullable|string|max:20',
+            'store_phone_3' => 'nullable|string|max:20',
+            'store_phone_4' => 'nullable|string|max:20',
             'store_email' => 'required|email|max:255',
             'store_address' => 'required|string',
             'store_upi' => 'nullable|string|max:255',
@@ -731,6 +734,9 @@ class AdminApiController extends Controller
         Setting::set('discount_percent', $request->discount_percent, 'number');
         Setting::set('store_whatsapp', $request->store_whatsapp, 'text');
         Setting::set('store_phone', $request->store_phone, 'text');
+        Setting::set('store_phone_2', $request->store_phone_2 ?? '', 'text');
+        Setting::set('store_phone_3', $request->store_phone_3 ?? '', 'text');
+        Setting::set('store_phone_4', $request->store_phone_4 ?? '', 'text');
         Setting::set('store_email', $request->store_email, 'text');
         Setting::set('store_address', $request->store_address, 'textarea');
         Setting::set('store_upi', $request->store_upi ?? '', 'text');
@@ -772,7 +778,9 @@ class AdminApiController extends Controller
                 $company->update([
                     'name' => $request->store_name,
                     'contact_1' => $request->store_phone,
-                    'contact_2' => $request->store_whatsapp,
+                    'contact_2' => $request->store_phone_2 ?: $request->store_whatsapp,
+                    'contact_3' => $request->store_phone_3,
+                    'contact_4' => $request->store_phone_4,
                     'email_1' => $request->store_email,
                     'address' => $request->store_address,
                     'address_1' => $request->store_address,
