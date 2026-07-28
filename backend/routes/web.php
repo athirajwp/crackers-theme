@@ -145,58 +145,7 @@ Route::prefix('api')->group(function () {
             return response($output)->header('Content-Type', 'text/plain');
         } catch (\Throwable $e) {
             return response("TEST EXCEPTION: " . $e->getMessage() . "\n\nTrace:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
-        }
     });
-// 2. Standalone Diagnostic Routes
-Route::get('/test-aisensy', function () {
-    try {
-        $enable = \App\Models\Setting::get('enable_aisensy', 'no');
-        $apiKey = trim(\App\Models\Setting::get('aisensy_api_key', ''));
-        $campaign = trim(\App\Models\Setting::get('aisensy_campaign_name', ''));
-        $shopPhone = preg_replace('/[^0-9]/', '', \App\Models\Setting::get('store_whatsapp', '919998887776'));
-        if (strlen($shopPhone) === 10) $shopPhone = '91' . $shopPhone;
-
-        $output = "=== AISENSY WHATSAPP API DIAGNOSTIC TEST ===\n";
-        $output .= "Enabled: {$enable}\n";
-        $output .= "API Key Present: " . (empty($apiKey) ? "NO (NOT SET)" : "YES (Key Starts with: " . substr($apiKey, 0, 15) . "...)") . "\n";
-        $output .= "Campaign Name: " . (empty($campaign) ? "NOT SET" : $campaign) . "\n";
-        $output .= "Destination Phone: {$shopPhone}\n\n";
-
-        if ($enable !== 'yes') {
-            $output .= "WARNING: AiSensy is currently DISABLED in Admin Settings. (Check the 'Enable AiSensy API' box in Admin > Settings)\n\n";
-        }
-
-        if (empty($apiKey)) {
-            $output .= "ERROR: AiSensy API Key is empty! Please paste your key in Admin > Settings.\n";
-            return response($output, 400)->header('Content-Type', 'text/plain');
-        }
-
-        if (empty($campaign)) {
-            $output .= "ERROR: AiSensy Campaign Name is empty! Please enter your approved campaign name in Admin > Settings.\n";
-            return response($output, 400)->header('Content-Type', 'text/plain');
-        }
-
-        $output .= "Sending test API POST request to https://backend.aisensy.com/campaign/t1/api/v2 ...\n\n";
-
-        $response = \Illuminate\Support\Facades\Http::post('https://backend.aisensy.com/campaign/t1/api/v2', [
-            'apiKey' => $apiKey,
-            'campaignName' => $campaign,
-            'destination' => $shopPhone,
-            'userName' => 'Test Customer',
-            'templateParams' => [
-                'TEST-1001',
-                '₹1,500',
-                'Test Customer'
-            ]
-        ]);
-
-        $output .= "HTTP Status Code: " . $response->status() . "\n";
-        $output .= "AiSensy Response Raw Body:\n" . $response->body() . "\n";
-
-        return response($output)->header('Content-Type', 'text/plain');
-    } catch (\Throwable $e) {
-        return response("TEST EXCEPTION: " . $e->getMessage() . "\n\nTrace:\n" . $e->getTraceAsString(), 500)->header('Content-Type', 'text/plain');
-    }
 });
 
 Route::get('/view-logs', function () {
