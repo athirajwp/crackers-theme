@@ -40,7 +40,10 @@ export default function AdminSysCompany() {
   const fetchCompanies = () => {
     setLoading(true);
     fetch('/api/admin_sys/companies')
-      .then((res) => res.json())
+      .then(async (res) => {
+        const contentType = res.headers.get('content-type') || '';
+        return contentType.includes('application/json') ? res.json() : {};
+      })
       .then((data) => {
         if (data.companies) {
           setCompanies(data.companies);
@@ -68,6 +71,10 @@ export default function AdminSysCompany() {
     setFormData({
       ...initialForm,
       ...comp,
+      gst_no: comp.gst_no || comp.gst_number || '',
+      pan_no: comp.pan_no || comp.pan_number || '',
+      msme_no: comp.msme_no || comp.msme_number || '',
+      address: comp.address || comp.address_1 || '',
     });
     setIsModalOpen(true);
   };
@@ -102,8 +109,21 @@ export default function AdminSysCompany() {
       },
       body: formPayload,
     })
-      .then((res) => {
-        return res.json().then((data) => ({ status: res.status, data }));
+      .then(async (res) => {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          return { status: res.status, data };
+        } else {
+          const text = await res.text();
+          return {
+            status: res.status,
+            data: {
+              success: false,
+              message: res.ok ? text : `Server returned non-JSON error (Status ${res.status}). Please check backend server log.`
+            }
+          };
+        }
       })
       .then(({ status, data }) => {
         setSubmitting(false);
@@ -147,7 +167,10 @@ export default function AdminSysCompany() {
 
   const handleToggleStatus = (comp) => {
     fetch(`/api/admin_sys/companies/${comp.id}/toggle-status`, { method: 'POST' })
-      .then((res) => res.json())
+      .then(async (res) => {
+        const contentType = res.headers.get('content-type') || '';
+        return contentType.includes('application/json') ? res.json() : {};
+      })
       .then((data) => {
         if (data.success) {
           fetchCompanies();
@@ -168,7 +191,10 @@ export default function AdminSysCompany() {
       }).then((result) => {
         if (result.isConfirmed) {
           fetch(`/api/admin_sys/companies/${comp.id}/destroy`, { method: 'DELETE' })
-            .then((res) => res.json())
+            .then(async (res) => {
+              const contentType = res.headers.get('content-type') || '';
+              return contentType.includes('application/json') ? res.json() : {};
+            })
             .then((data) => {
               if (data.success) {
                 fetchCompanies();

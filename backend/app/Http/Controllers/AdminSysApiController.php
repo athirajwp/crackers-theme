@@ -149,7 +149,10 @@ class AdminSysApiController extends Controller
                 DB::connection('central')->statement("CREATE DATABASE $tenantDb");
             }
 
-            $config = config("database.connections.central");
+            $config = config("database.connections.central") ?: config("database.connections." . config('database.default'));
+            if (!$config) {
+                throw new \Exception("Database connection configuration not found.");
+            }
             $config['database'] = $tenantDb;
             config(["database.connections.tenant_migration" => $config]);
 
@@ -168,13 +171,13 @@ class AdminSysApiController extends Controller
             
             $this->syncCompanyToSettings($company);
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $company->delete();
             try {
                 if (isset($tenantDb)) {
                     DB::connection('central')->statement("DROP DATABASE IF EXISTS $tenantDb");
                 }
-            } catch (\Exception $dbDropEx) {}
+            } catch (\Throwable $dbDropEx) {}
             
             Log::error('Tenant database setup failed: ' . $e->getMessage());
             return response()->json([
@@ -209,12 +212,27 @@ class AdminSysApiController extends Controller
 
         $data = $request->only([
             'code', 'name', 'website', 'contact_1', 'contact_2', 'contact_3',
-            'address', 'gst_no', 'pan_no', 'msme_no', 'status',
+            'address', 'address_1', 'gst_no', 'gst_number', 'pan_no', 'pan_number',
+            'msme_no', 'msme_number', 'status',
             'bank_name_1', 'bank_acc_1', 'bank_ifsc_1', 'bank_branch_1',
             'bank_name_2', 'bank_acc_2', 'bank_ifsc_2', 'bank_branch_2',
             'bank_name_3', 'bank_acc_3', 'bank_ifsc_3', 'bank_branch_3',
             'upi_id_1', 'upi_id_2', 'upi_id_3'
         ]);
+
+        // Map form field aliases to model column names
+        if (isset($data['gst_no']) && !isset($data['gst_number'])) {
+            $data['gst_number'] = $data['gst_no'];
+        }
+        if (isset($data['pan_no']) && !isset($data['pan_number'])) {
+            $data['pan_number'] = $data['pan_no'];
+        }
+        if (isset($data['msme_no']) && !isset($data['msme_number'])) {
+            $data['msme_number'] = $data['msme_no'];
+        }
+        if (isset($data['address']) && !isset($data['address_1'])) {
+            $data['address_1'] = $data['address'];
+        }
 
         if (isset($data['website'])) {
             $websiteClean = strtolower(trim($data['website']));
@@ -256,7 +274,11 @@ class AdminSysApiController extends Controller
         try {
             $tenantDb = 'crackers2_' . strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $company->code));
             
-            $config = config("database.connections.central");
+            $config = config("database.connections.central") ?: config("database.connections." . config('database.default'));
+            if (!$config) {
+                return;
+            }
+
             $config['database'] = $tenantDb;
             config(["database.connections.tenant_sync" => $config]);
 
@@ -303,7 +325,7 @@ class AdminSysApiController extends Controller
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Tenant settings sync error: ' . $e->getMessage());
         }
     }
