@@ -899,28 +899,33 @@ class AdminApiController extends Controller
                     $field => 'file|max:20480'
                 ]);
 
-                // Read file contents and convert to Base64
                 $file = $request->file($field);
-                $fileData = file_get_contents($file->getRealPath());
-                $mimeType = $file->getMimeType();
-                if ($mimeType === 'application/octet-stream' || str_ends_with(strtolower($file->getClientOriginalName()), '.ico')) {
-                    $mimeType = 'image/x-icon';
+                $ext = strtolower($file->getClientOriginalExtension());
+                if (!$ext) {
+                    $ext = strtolower($file->extension()) ?: 'png';
                 }
-                $base64 = 'data:' . $mimeType . ';base64,' . base64_encode($fileData);
+                
+                $fileName = time() . '_' . $field . '_' . uniqid() . '.' . $ext;
+                $file->move(public_path($uploadDir), $fileName);
+                $filePath = $uploadDir . '/' . $fileName;
 
-                // Clean up old file from disk if it was a legacy file
+                // Clean up old file from disk if it existed
                 $oldPath = Setting::get($field);
                 if ($oldPath && !str_starts_with($oldPath, 'data:') && file_exists(public_path($oldPath))) {
                     @unlink(public_path($oldPath));
                 }
 
-                Setting::set($field, $base64, 'text');
+                Setting::set($field, $filePath, 'text');
 
                 if ($company) {
-                    if ($field === 'store_logo') {
-                        $company->update(['logo_path' => $base64]);
-                    } elseif ($field === 'store_favicon') {
-                        $company->update(['favicon_path' => $base64]);
+                    try {
+                        if ($field === 'store_logo') {
+                            $company->update(['logo_path' => $filePath]);
+                        } elseif ($field === 'store_favicon') {
+                            $company->update(['favicon_path' => $filePath]);
+                        }
+                    } catch (\Throwable $compEx) {
+                        Log::error("Company model logo/favicon update error: " . $compEx->getMessage());
                     }
                 }
             }
