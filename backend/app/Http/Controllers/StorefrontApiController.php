@@ -29,6 +29,9 @@ class StorefrontApiController extends Controller
             'discount_percent' => Setting::get('discount_percent', 60),
             'store_whatsapp' => Setting::get('store_whatsapp', '919998887776'),
             'store_phone' => Setting::get('store_phone', '+91 9998887776'),
+            'store_phone_2' => Setting::get('store_phone_2', ''),
+            'store_phone_3' => Setting::get('store_phone_3', ''),
+            'store_phone_4' => Setting::get('store_phone_4', ''),
             'store_email' => Setting::get('store_email', 'crackerdemo@gmail.com'),
             'store_address' => Setting::get('store_address', 'Virudhunagar to Sivakasi Main Road, Sivakasi'),
             

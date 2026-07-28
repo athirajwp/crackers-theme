@@ -47,6 +47,9 @@ export default function AdminSettings() {
         if (data.settings) {
           setFormData({
             ...data.settings,
+            store_phone_2: data.settings.store_phone_2 || '',
+            store_phone_3: data.settings.store_phone_3 || '',
+            store_phone_4: data.settings.store_phone_4 || '',
             min_order_value: parseFloat(data.settings.min_order_value) || 0,
             discount_percent: parseFloat(data.settings.discount_percent) || 0,
             tax_percent: parseFloat(data.settings.tax_percent) || 0,
