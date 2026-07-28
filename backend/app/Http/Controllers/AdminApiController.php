@@ -687,7 +687,7 @@ class AdminApiController extends Controller
             'bank_ifsc' => Setting::get('bank_ifsc', 'SBIN0000123'),
             'bank_holder' => Setting::get('bank_holder', 'Cracker Demo'),
             
-            // Feature flags
+            // Feature flags & AiSensy WhatsApp config
             'enable_min_order' => Setting::get('enable_min_order', 'yes'),
             'enable_promo_codes' => Setting::get('enable_promo_codes', 'yes'),
             'enable_tax_delivery' => Setting::get('enable_tax_delivery', 'no'),
@@ -697,6 +697,9 @@ class AdminApiController extends Controller
             'default_view_mode' => Setting::get('default_view_mode', 'flex'),
             'tax_percent' => Setting::get('tax_percent', 18),
             'delivery_charge' => Setting::get('delivery_charge', 150),
+            'enable_aisensy' => Setting::get('enable_aisensy', 'no'),
+            'aisensy_api_key' => Setting::get('aisensy_api_key', ''),
+            'aisensy_campaign_name' => Setting::get('aisensy_campaign_name', ''),
         ];
 
         return response()->json(['settings' => $settings]);
@@ -729,6 +732,9 @@ class AdminApiController extends Controller
             'default_view_mode' => 'nullable|in:flex,grid',
             'tax_percent' => 'required|numeric|min:0|max:100',
             'delivery_charge' => 'required|numeric|min:0',
+            'enable_aisensy' => 'nullable|in:yes,no',
+            'aisensy_api_key' => 'nullable|string',
+            'aisensy_campaign_name' => 'nullable|string',
             'store_upi_qr' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:20480',
         ]);
 
@@ -742,6 +748,9 @@ class AdminApiController extends Controller
         Setting::set('store_phone_4', $request->store_phone_4 ?? '', 'text');
         Setting::set('store_email', $request->store_email, 'text');
         Setting::set('store_address', $request->store_address, 'textarea');
+        Setting::set('enable_aisensy', $request->enable_aisensy ?? 'no', 'text');
+        Setting::set('aisensy_api_key', $request->aisensy_api_key ?? '', 'text');
+        Setting::set('aisensy_campaign_name', $request->aisensy_campaign_name ?? '', 'text');
         Setting::set('store_upi', $request->store_upi ?? '', 'text');
         Setting::set('bank_name', $request->bank_name ?? '', 'text');
         Setting::set('bank_acc_no', $request->bank_acc_no ?? '', 'text');

@@ -562,6 +562,64 @@ export default function AdminSettings() {
             </div>
           </div>
 
+          {/* Automated AiSensy WhatsApp API Configuration */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                  <i className="fa-brands fa-whatsapp text-emerald-600 text-sm"></i> Automated AiSensy WhatsApp Notifications
+                </h3>
+                <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                  Send automated WhatsApp order notifications to customers & store owner via your AiSensy API Key
+                </p>
+              </div>
+              <div className="flex items-center gap-3 select-none">
+                <label className="text-xs font-bold text-slate-700">Enable AiSensy API:</label>
+                <input
+                  type="checkbox"
+                  name="enable_aisensy"
+                  checked={formData.enable_aisensy === 'yes'}
+                  onChange={(e) => setFormData({ ...formData, enable_aisensy: e.target.checked ? 'yes' : 'no' })}
+                  className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {formData.enable_aisensy === 'yes' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-semibold">
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                    AiSensy API Key
+                  </label>
+                  <input
+                    type="password"
+                    name="aisensy_api_key"
+                    value={formData.aisensy_api_key || ''}
+                    onChange={handleChange}
+                    placeholder="Enter your AiSensy API key"
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none transition-all font-mono"
+                  />
+                  <p className="text-[9px] text-slate-400">Found in AiSensy Dashboard &gt; Manage &gt; API Key</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                    AiSensy Campaign / Template Name
+                  </label>
+                  <input
+                    type="text"
+                    name="aisensy_campaign_name"
+                    value={formData.aisensy_campaign_name || ''}
+                    onChange={handleChange}
+                    placeholder="e.g. order_confirmation"
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl px-4 py-2.5 text-xs font-semibold outline-none transition-all"
+                  />
+                  <p className="text-[9px] text-slate-400">Name of your approved campaign/template in AiSensy</p>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-3 select-none">
             <button
               type="submit"

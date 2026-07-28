@@ -197,8 +197,49 @@ class CheckoutController extends Controller
                         Log::error("Failed to send customer order confirmation email to {$customerEmail}: " . $m2->getMessage());
                     }
                 }
-            } catch (\Throwable $e) {
-                Log::error('Failed to process order email dispatch: ' . $e->getMessage());
+            // Send Automated AiSensy WhatsApp Notifications
+            try {
+                $enableAiSensy = Setting::get('enable_aisensy', 'no') === 'yes';
+                $aisensyKey = trim(Setting::get('aisensy_api_key', ''));
+                $aisensyCampaign = trim(Setting::get('aisensy_campaign_name', ''));
+
+                if ($enableAiSensy && !empty($aisensyKey) && !empty($aisensyCampaign)) {
+                    // Send to Customer
+                    $custPhone = preg_replace('/[^0-9]/', '', $order->whatsapp ?: $order->phone);
+                    if (strlen($custPhone) === 10) $custPhone = '91' . $custPhone;
+
+                    \Illuminate\Support\Facades\Http::post('https://backend.aisensy.com/campaign/t1/api/v2', [
+                        'apiKey' => $aisensyKey,
+                        'campaignName' => $aisensyCampaign,
+                        'destination' => '+' . $custPhone,
+                        'userName' => $order->name,
+                        'templateParams' => [
+                            $order->order_number,
+                            '₹' . number_format($order->net_amount, 2),
+                            $order->name
+                        ]
+                    ]);
+
+                    // Send to Shop Owner
+                    $shopPhone = preg_replace('/[^0-9]/', '', Setting::get('store_whatsapp', '919998887776'));
+                    if (strlen($shopPhone) === 10) $shopPhone = '91' . $shopPhone;
+
+                    \Illuminate\Support\Facades\Http::post('https://backend.aisensy.com/campaign/t1/api/v2', [
+                        'apiKey' => $aisensyKey,
+                        'campaignName' => $aisensyCampaign,
+                        'destination' => '+' . $shopPhone,
+                        'userName' => 'Shop Owner',
+                        'templateParams' => [
+                            $order->order_number,
+                            '₹' . number_format($order->net_amount, 2),
+                            $order->name
+                        ]
+                    ]);
+
+                    Log::info("AiSensy WhatsApp notifications sent for order {$order->order_number}");
+                }
+            } catch (\Throwable $waEx) {
+                Log::error("AiSensy WhatsApp API error: " . $waEx->getMessage());
             }
 
             return response()->json([
