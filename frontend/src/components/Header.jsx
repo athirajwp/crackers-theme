@@ -157,25 +157,25 @@ export default function Header() {
           {/* RIGHT: Mobile Numbers */}
           <div className="hidden md:flex flex-col items-center text-center gap-0.5 flex-shrink-0">
             <h3 className="text-crimson-700 font-extrabold text-xs uppercase tracking-widest">Mobile Numbers</h3>
-            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 max-w-[240px]">
+            <div className="flex flex-col items-center justify-center gap-0.5">
               {settings.store_phone && (
-                <a href={`tel:${settings.store_phone}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors">
+                <a href={`tel:${settings.store_phone}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors block">
                   {settings.store_phone}
                 </a>
               )}
               {settings.store_phone_2 && (
-                <a href={`tel:${settings.store_phone_2}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors">
-                  , {settings.store_phone_2}
+                <a href={`tel:${settings.store_phone_2}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors block">
+                  {settings.store_phone_2}
                 </a>
               )}
               {settings.store_phone_3 && (
-                <a href={`tel:${settings.store_phone_3}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors">
-                  , {settings.store_phone_3}
+                <a href={`tel:${settings.store_phone_3}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors block">
+                  {settings.store_phone_3}
                 </a>
               )}
               {settings.store_phone_4 && (
-                <a href={`tel:${settings.store_phone_4}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors">
-                  , {settings.store_phone_4}
+                <a href={`tel:${settings.store_phone_4}`} className="text-slate-900 text-xs font-black hover:text-crimson-700 transition-colors block">
+                  {settings.store_phone_4}
                 </a>
               )}
             </div>
