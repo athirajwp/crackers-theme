@@ -218,9 +218,9 @@ class CheckoutController extends Controller
                         'destination' => $custPhone,
                         'userName' => $order->name,
                         'templateParams' => [
+                            $order->name,
                             $order->order_number,
-                            '₹' . number_format($order->net_amount, 2),
-                            $order->name
+                            '₹' . number_format($order->net_amount, 2)
                         ]
                     ]);
 
@@ -236,9 +236,9 @@ class CheckoutController extends Controller
                         'destination' => $shopPhone,
                         'userName' => 'Shop Owner',
                         'templateParams' => [
+                            $order->name,
                             $order->order_number,
-                            '₹' . number_format($order->net_amount, 2),
-                            $order->name
+                            '₹' . number_format($order->net_amount, 2)
                         ]
                     ]);
 

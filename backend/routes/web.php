@@ -133,9 +133,9 @@ Route::prefix('api')->group(function () {
                 'destination' => $shopPhone,
                 'userName' => 'Test Customer',
                 'templateParams' => [
-                    'TEST-1001',
-                    '₹1,500',
-                    'Test Customer'
+                    'Test Customer',
+                    'ORD-1001',
+                    '₹1,500'
                 ]
             ]);
 
