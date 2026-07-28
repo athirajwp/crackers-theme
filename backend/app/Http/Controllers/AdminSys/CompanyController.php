@@ -33,12 +33,15 @@ class CompanyController extends Controller
         $request->validate([
             'code' => 'required|string|max:255|unique:companies,code',
             'name' => 'required|string|max:255',
-            'website' => 'required|string|max:255',
-            'contact_1' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'website' => 'nullable|string|max:255',
+            'contact_1' => 'nullable|string|max:255',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
         $data = $request->all();
+        $data['website'] = !empty($data['website']) ? $data['website'] : strtolower($data['code']) . '.com';
+        $data['contact_1'] = $data['contact_1'] ?? '';
+        $data['status'] = $data['status'] ?? 'active';
 
         // Automatically assign port if website is localhost / 127.0.0.1
         $websiteClean = strtolower(trim($data['website']));
@@ -139,9 +142,9 @@ class CompanyController extends Controller
         $request->validate([
             'code' => 'required|string|max:255|unique:companies,code,' . $id,
             'name' => 'required|string|max:255',
-            'website' => 'required|string|max:255',
-            'contact_1' => 'required|string|max:255',
-            'status' => 'required|in:active,inactive',
+            'website' => 'nullable|string|max:255',
+            'contact_1' => 'nullable|string|max:255',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
         $data = $request->all();

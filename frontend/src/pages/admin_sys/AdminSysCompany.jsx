@@ -444,7 +444,6 @@ export default function AdminSysCompany() {
                   <input
                     type="text"
                     name="website"
-                    required
                     value={formData.website}
                     onChange={handleChange}
                     placeholder="e.g. jallikattucrackers.com or localhost"
@@ -457,7 +456,6 @@ export default function AdminSysCompany() {
                   <input
                     type="text"
                     name="contact_1"
-                    required
                     value={formData.contact_1}
                     onChange={handleChange}
                     placeholder="+91 9998887776"
