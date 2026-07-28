@@ -50,20 +50,19 @@ class AppServiceProvider extends ServiceProvider
                 'mail.mailers.smtp.port' => 587,
                 'mail.mailers.smtp.encryption' => 'tls',
                 'mail.mailers.smtp.username' => 'athiraj.vnr@gmail.com',
-                'mail.mailers.smtp.password' => 'qbvg pfmj urol tsvv',
+                'mail.mailers.smtp.password' => 'qbvgpfmjuroltsvv',
                 'mail.from.address' => 'athiraj.vnr@gmail.com',
                 'mail.from.name' => 'Athiraj',
             ]);
         }
 
-        // 3. Auto-correct Gmail SMTP settings for port 587/TLS compatibility (especially for Render)
+        // 3. Auto-correct Gmail SMTP settings for port 587/TLS compatibility
         if (config('mail.mailers.smtp.host') === 'smtp.gmail.com') {
-            if (config('mail.mailers.smtp.port') == 465 || empty(config('mail.mailers.smtp.encryption')) || config('mail.mailers.smtp.encryption') === 'ssl') {
-                config([
-                    'mail.mailers.smtp.port' => 587,
-                    'mail.mailers.smtp.encryption' => 'tls',
-                ]);
-            }
+            config([
+                'mail.mailers.smtp.password' => str_replace(' ', '', config('mail.mailers.smtp.password')),
+                'mail.mailers.smtp.port' => 587,
+                'mail.mailers.smtp.encryption' => 'tls',
+            ]);
         }
     }
 

@@ -173,36 +173,32 @@ class CheckoutController extends Controller
 
             // Send order invoice email to admin and customer
             try {
-                $orderId = $order->id;
-                $tenantDb = config('database.connections.' . config('database.default') . '.database');
-                
-                $disabledFunctions = explode(',', ini_get('disable_functions'));
-                $disabledFunctions = array_map('trim', $disabledFunctions);
-                
-                $canExec = function_exists('exec') && !in_array('exec', $disabledFunctions);
-                $canPopen = function_exists('popen') && !in_array('popen', $disabledFunctions);
+                $adminEmail = Setting::get('store_email', config('mail.from.address'));
+                $customerEmail = $order->email;
 
-                if (strncasecmp(PHP_OS, 'WIN', 3) === 0 && $canPopen) {
-                    $artisanPath = base_path('artisan');
-                    $cmd = 'start /B "" php ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb);
-                    @pclose(@popen($cmd, 'r'));
-                } elseif ($canExec) {
-                    $artisanPath = base_path('artisan');
-                    $logPath = storage_path('logs/email_background.log');
-                    $cmd = 'nohup php ' . escapeshellarg($artisanPath) . ' order:send-email ' . escapeshellarg($orderId) . ' --tenant-db=' . escapeshellarg($tenantDb) . ' > ' . escapeshellarg($logPath) . ' 2>&1 &';
-                    @exec($cmd);
-                } else {
+                $order->load('items');
+
+                // Send admin invoice email
+                if (!empty($adminEmail)) {
                     try {
-                        \Illuminate\Support\Facades\Artisan::call('order:send-email', [
-                            'order_id' => $orderId,
-                            '--tenant-db' => $tenantDb,
-                        ]);
-                    } catch (\Throwable $syncEx) {
-                        Log::warning('Synchronous order email dispatch warning: ' . $syncEx->getMessage());
+                        \Illuminate\Support\Facades\Mail::to($adminEmail)->send(new \App\Mail\AdminInvoiceMail($order));
+                        Log::info("Admin invoice email sent successfully to {$adminEmail} for order {$order->order_number}");
+                    } catch (\Throwable $m1) {
+                        Log::error("Failed to send admin order invoice email to {$adminEmail}: " . $m1->getMessage());
+                    }
+                }
+
+                // Send customer confirmation email
+                if (!empty($customerEmail)) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($customerEmail)->send(new \App\Mail\CustomerOrderMail($order));
+                        Log::info("Customer confirmation email sent successfully to {$customerEmail} for order {$order->order_number}");
+                    } catch (\Throwable $m2) {
+                        Log::error("Failed to send customer order confirmation email to {$customerEmail}: " . $m2->getMessage());
                     }
                 }
             } catch (\Throwable $e) {
-                Log::error('Failed to send order email: ' . $e->getMessage());
+                Log::error('Failed to process order email dispatch: ' . $e->getMessage());
             }
 
             return response()->json([

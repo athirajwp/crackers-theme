@@ -190,9 +190,25 @@ HTML;
                 }
             }
 
-            // Share currentCompany with all views
+            // Share currentCompany with all views & set dynamic SMTP config if available
             if ($currentCompany) {
                 view()->share('currentCompany', $currentCompany);
+
+                if (!empty($currentCompany->smtp_host) && !empty($currentCompany->smtp_user) && !empty($currentCompany->smtp_pass)) {
+                    $sslVal = strtolower((string)$currentCompany->smtp_ssl);
+                    $encryption = ($sslVal === 'true' || $sslVal === 'ssl' || $currentCompany->smtp_port == 465) ? 'ssl' : 'tls';
+                    config([
+                        'mail.default' => 'smtp',
+                        'mail.mailers.smtp.transport' => 'smtp',
+                        'mail.mailers.smtp.host' => trim($currentCompany->smtp_host),
+                        'mail.mailers.smtp.port' => (int) ($currentCompany->smtp_port ?: 587),
+                        'mail.mailers.smtp.encryption' => $encryption,
+                        'mail.mailers.smtp.username' => trim($currentCompany->smtp_user),
+                        'mail.mailers.smtp.password' => trim(str_replace(' ', '', $currentCompany->smtp_pass)),
+                        'mail.from.address' => trim($currentCompany->smtp_user),
+                        'mail.from.name' => $currentCompany->name ?: config('mail.from.name'),
+                    ]);
+                }
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::warning('Tenant connection switching failed: ' . $e->getMessage());
