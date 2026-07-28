@@ -197,6 +197,10 @@ class CheckoutController extends Controller
                         Log::error("Failed to send customer order confirmation email to {$customerEmail}: " . $m2->getMessage());
                     }
                 }
+            } catch (\Throwable $e) {
+                Log::error('Failed to process order email dispatch: ' . $e->getMessage());
+            }
+
             // Send Automated AiSensy WhatsApp Notifications
             try {
                 $enableAiSensy = Setting::get('enable_aisensy', 'no') === 'yes';
