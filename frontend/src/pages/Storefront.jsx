@@ -71,24 +71,7 @@ export default function Storefront() {
                 We are Sivakasi's premier online fireworks ordering platform, dedicated to delivering 100% original, certified high-quality crackers directly from the manufacturing hub of Sivakasi. Choose from our extensive collection of sparkling sparklers, traditional ground chakkars, vibrant flower pots, thunderous sound crackers, multi-shot aerial repeaters, and fancy sky displays at unbeatable factory rates with <strong className="text-crimson-600 font-extrabold">Flat {settings.discount_percent}% Wholesale Discount!</strong>
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 text-[11px] font-bold text-slate-700">
-                <div className="flex items-center gap-2 bg-white/80 border border-slate-200/90 px-3.5 py-2 rounded-xl shadow-2xs">
-                  <i className="fa-solid fa-leaf text-emerald-600 text-xs"></i>
-                  <span>100% Certified Green Crackers</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/80 border border-slate-200/90 px-3.5 py-2 rounded-xl shadow-2xs">
-                  <i className="fa-solid fa-industry text-crimson-600 text-xs"></i>
-                  <span>Direct Sivakasi Factory Rates</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/80 border border-slate-200/90 px-3.5 py-2 rounded-xl shadow-2xs">
-                  <i className="fa-solid fa-box-archive text-amber-600 text-xs"></i>
-                  <span>Moisture-Proof Export Packaging</span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/80 border border-slate-200/90 px-3.5 py-2 rounded-xl shadow-2xs">
-                  <i className="fa-solid fa-shield-halved text-blue-600 text-xs"></i>
-                  <span>Tested Safety & Low-Smoke Tech</span>
-                </div>
-              </div>
+
             </div>
 
             {/* Right: Diwali Kids Image */}
