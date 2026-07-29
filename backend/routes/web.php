@@ -96,6 +96,41 @@ Route::prefix('api')->group(function () {
             return response("Error reading logs: " . $e->getMessage(), 500)->header('Content-Type', 'text/plain');
         }
     });
+
+    Route::get('/setup-db', function () {
+        try {
+            $output = "=== HOSTINGER DATABASE AUTO-SETUP & SEEDER ===\n\n";
+
+            // 1. Test Database Connection
+            try {
+                \Illuminate\Support\Facades\DB::connection()->getPdo();
+                $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
+                $output .= "SUCCESS: Database connected to '{$dbName}'!\n\n";
+            } catch (\Exception $e) {
+                $output .= "ERROR: Database connection failed!\n";
+                $output .= "Reason: " . $e->getMessage() . "\n\n";
+                $output .= "Troubleshooting Hint:\n";
+                $output .= "Check your backend/.env file: DB_HOST should be 'localhost' and DB_PASSWORD must match your Hostinger MySQL password.\n";
+                return response($output, 200)->header('Content-Type', 'text/plain');
+            }
+
+            // 2. Run Migrations
+            $output .= "Running database migrations (php artisan migrate)...\n";
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output .= \Illuminate\Support\Facades\Artisan::output() . "\n";
+
+            // 3. Run Seeders
+            $output .= "Seeding categories and fireworks products (php artisan db:seed)...\n";
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            $output .= \Illuminate\Support\Facades\Artisan::output() . "\n";
+
+            $output .= "=== SETUP COMPLETE! Your categories and crackers are now loaded in the database. ===";
+
+            return response($output, 200)->header('Content-Type', 'text/plain');
+        } catch (\Throwable $e) {
+            return response("SETUP EXCEPTION:\n" . $e->getMessage() . "\n\nTrace:\n" . $e->getTraceAsString(), 200)->header('Content-Type', 'text/plain');
+        }
+    });
 });
 
 Route::get('/view-logs', function () {
